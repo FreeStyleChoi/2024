@@ -56,7 +56,7 @@ int main(int argc, char** argv)
 	Uint32 frameStart;
 	Uint32 frameTime;
 
-	// LOAD IMAGES AND DEFINE IMAGE RECT
+	/* LOAD IMAGES AND DEFINE IMAGE RECT */
 	// !!!!! SPEED_MIN = 1/frameDelay !!!!! //
 	SDL_Surface* tmpSurface;
 
@@ -65,6 +65,13 @@ int main(int argc, char** argv)
 	tmpSurface = IMG_Load("assets/Blue.png");
 	SDL_Texture* TmpTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 	SDL_FreeSurface(tmpSurface);
+
+	if (tmp == NULL)
+	{
+		Entity* tmp = (Entity*)malloc(sizeof(Entity) * TMPMAX);
+		tmpSurface = IMG_Load("assets/Blue.png");
+		SDL_FreeSurface(tmpSurface);
+	}
 
 	if (tmp != NULL)
 	{
@@ -80,14 +87,18 @@ int main(int argc, char** argv)
 		}
 	}
 
-
-	// background
-
-	// ocean
+	// Ocean
 	Background* Ocean = (Background*)malloc(sizeof(Background) * 2);
 	tmpSurface = IMG_Load("assets/background_sea.png");
 	SDL_Texture* OceanTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 	SDL_FreeSurface(tmpSurface);
+
+	if (Ocean == NULL)
+	{
+		Background* Ocean = (Background*)malloc(sizeof(Background) * 2);
+		tmpSurface = IMG_Load("assets/background_sea.png");
+		SDL_FreeSurface(tmpSurface);
+	}
 
 	if (Ocean != NULL)
 	{
@@ -107,11 +118,18 @@ int main(int argc, char** argv)
 		Ocean[1].Onscreen = true;
 	}
 
-	// cloud
+	// Cloud
 	Background* Cloud = (Background*)malloc(sizeof(Background) * 2);
 	tmpSurface = IMG_Load("assets/cloud.png");
 	SDL_Texture* CloudTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 	SDL_FreeSurface(tmpSurface);
+
+	if (Cloud == NULL)
+	{
+		Background* Cloud = (Background*)malloc(sizeof(Background) * 2);
+		tmpSurface = IMG_Load("assets/cloud.png");
+		SDL_FreeSurface(tmpSurface);
+	}
 
 	if (Cloud != NULL)
 	{
@@ -131,7 +149,7 @@ int main(int argc, char** argv)
 		Cloud[1].Onscreen = true;
 	}
 
-	// plane
+	// User
 	Plane* User = (Plane*)malloc(sizeof(Plane) * 1);
 	tmpSurface = IMG_Load("D:/Suyoung/code/c_games/2024/assets/User.png");
 	SDL_Texture* UserTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
@@ -139,8 +157,6 @@ int main(int argc, char** argv)
 
 	if (User == NULL)
 	{
-		free(User);
-		User = NULL;
 		Plane* User = (Plane*)malloc(sizeof(Plane) * 1);
 		tmpSurface = IMG_Load("D:/Suyoung/code/c_games/2024/assets/User.png");
 		SDL_FreeSurface(tmpSurface);
@@ -163,12 +179,13 @@ int main(int argc, char** argv)
 
 	SDL_Event event;
 
+	/*MAIN LOOP*/
 	while (isRunning)
 	{
-		// fps 1
+		/*FPS 1*/
 		frameStart = (Uint32)SDL_GetTicks64();
 
-		// event
+		/*EVENT*/
 		SDL_PollEvent(&event);
 		switch (event.type)
 		{
@@ -233,16 +250,64 @@ int main(int argc, char** argv)
 			}
 			break;
 		case SDL_KEYUP:
-			if (User != NULL)
+			switch (event.key.keysym.sym)
 			{
-				User->speed.x = 0;
-				User->speed.y = 0;
+			case SDLK_w:
+				if (User != NULL)
+				{
+					User->speed.y = 0;
+				}
+				break;
+			case SDLK_s:
+				if (User != NULL)
+				{
+					User->speed.y = 0;
+				}
+				break;
+			case SDLK_a:
+				if (User != NULL)
+				{
+					User->speed.x = 0;
+				}
+				break;
+			case SDLK_d:
+				if (User != NULL)
+				{
+					User->speed.x = 0;
+				}
+				break;
+			case SDLK_UP:
+				if (User != NULL)
+				{
+					User->speed.y = 0;
+				}
+				break;
+			case SDLK_DOWN:
+				if (User != NULL)
+				{
+					User->speed.y = 0;
+				}
+				break;
+			case SDLK_LEFT:
+				if (User != NULL)
+				{
+					User->speed.x = -0;
+				}
+				break;
+			case SDLK_RIGHT:
+				if (User != NULL)
+				{
+					User->speed.x = 0;
+				}
+				break;
+			default:
+				break;
 			}
 		default:
 			break;
 		}
 
-		// update
+		/*UPDATE*/
 
 		// example
 		if (tmp != NULL)
@@ -309,7 +374,8 @@ int main(int argc, char** argv)
 			}
 		}
 
-		// render
+		/*RENDERER*/
+
 		SDL_RenderClear(renderer);
 
 		// Ocean
@@ -336,6 +402,7 @@ int main(int argc, char** argv)
 			}
 		}
 
+		// User
 		if (User != NULL)
 		{
 			if (User->Onscreen == true)
@@ -355,9 +422,10 @@ int main(int argc, char** argv)
 				}
 			}
 		}
+
 		SDL_RenderPresent(renderer);
 
-		// fps 2
+		/*FPS 2*/
 		frameTime = (Uint32)SDL_GetTicks64() - frameStart;
 		if (frameDelay > frameTime)
 		{
@@ -365,9 +433,9 @@ int main(int argc, char** argv)
 		}
 	}
 
-	// EXIT
+	/*EXIT*/
 
-	// memory
+	// Memory
 	if (tmp != NULL)
 	{
 		free(tmp);
@@ -392,7 +460,7 @@ int main(int argc, char** argv)
 		free(User);
 		User = NULL;
 	}
-	// sdl
+	// SDL
 	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);
 	SDL_Quit();
