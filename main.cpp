@@ -1,7 +1,8 @@
 ﻿#include "include.h"
 
-#define WINDOW_W 480
-#define WINDOW_H 640
+
+#define WINDOW_W 960
+#define WINDOW_H 1280
 
 #define TMPMAX 10
 
@@ -132,7 +133,7 @@ int main(int argc, char** argv)
 
 	// plane
 	Plane* User = (Plane*)malloc(sizeof(Plane) * 1);
-	tmpSurface = IMG_Load("assets/character_test_3.png");
+	tmpSurface = IMG_Load("D:/Suyoung/code/c_games/2024/assets/User.png");
 	SDL_Texture* UserTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 	SDL_FreeSurface(tmpSurface);
 
@@ -141,7 +142,7 @@ int main(int argc, char** argv)
 		free(User);
 		User = NULL;
 		Plane* User = (Plane*)malloc(sizeof(Plane) * 1);
-		tmpSurface = IMG_Load("assets/character_test_3.png");
+		tmpSurface = IMG_Load("D:/Suyoung/code/c_games/2024/assets/User.png");
 		SDL_FreeSurface(tmpSurface);
 	}
 
@@ -203,6 +204,30 @@ int main(int argc, char** argv)
 					User->speed.x = 0.4;
 				}
 				break;
+			case SDLK_UP:
+				if (User != NULL)
+				{
+					User->speed.y = -0.4;
+				}
+				break;
+			case SDLK_DOWN:
+				if (User != NULL)
+				{
+					User->speed.y = 0.4;
+				}
+				break;
+			case SDLK_LEFT:
+				if (User != NULL)
+				{
+					User->speed.x = -0.4;
+				}
+				break;
+			case SDLK_RIGHT:
+				if (User != NULL)
+				{
+					User->speed.x = 0.4;
+				}
+				break;
 			default:
 				break;
 			}
@@ -235,6 +260,25 @@ int main(int argc, char** argv)
 		{
 			User->rect.x += (int)(User->speed.x * frameDelay);
 			User->rect.y += (int)(User->speed.y * frameDelay);
+
+			if (User->rect.y <= 0)
+			{
+				User->rect.y = 0;
+			}
+			else if (User->rect.y >= WINDOW_H - User->rect.h)
+			{
+				User->rect.y = WINDOW_H - User->rect.h;
+			}
+
+			if (User->rect.x <= 0)
+			{
+				User->rect.x = 0;
+			}
+
+			else if (User->rect.x >= WINDOW_W - User->rect.w)
+			{
+				User->rect.x = WINDOW_W - User->rect.w;
+			}
 		}
 
 		// Cloud
