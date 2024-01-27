@@ -182,25 +182,25 @@ int main(int argc, char** argv)
 			case SDLK_w:
 				if (User != NULL)
 				{
-					User->speed.y = -0.1;
+					User->speed.y = -0.4;
 				}
 				break;
 			case SDLK_s:
 				if (User != NULL)
 				{
-					User->speed.y = 0.1;
+					User->speed.y = 0.4;
 				}
 				break;
 			case SDLK_a:
 				if (User != NULL)
 				{
-					User->speed.x = -0.1;
+					User->speed.x = -0.4;
 				}
 				break;
 			case SDLK_d:
 				if (User != NULL)
 				{
-					User->speed.x = 0.1;
+					User->speed.x = 0.4;
 				}
 				break;
 			default:
