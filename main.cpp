@@ -1,4 +1,12 @@
-﻿#include "include.h"
+﻿/*
+	만들어야 할것
+	- 총알 발사하기
+	- 에너미 움직이기
+	- 에너미가 총알 발사하기
+	- 그레픽 업그래이드하기
+*/
+
+#include "include.h"
 
 
 #define WINDOW_W 480
@@ -170,6 +178,7 @@ int main(int argc, char** argv)
 	}
 	if (User == NULL)
 	{
+		free(User);
 		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)");
 		SDL_DestroyWindow(window);
 		SDL_DestroyRenderer(renderer);
@@ -203,6 +212,7 @@ int main(int argc, char** argv)
 	}
 	if (Enemy == NULL)
 	{
+		free(Enemy);
 		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)");
 		SDL_DestroyWindow(window);
 		SDL_DestroyRenderer(renderer);
@@ -219,7 +229,7 @@ int main(int argc, char** argv)
 	Enemy->gameover = false;
 	Enemy->Onscreen = true;
 
-	// User Bullet
+	// User's Bullet
 	Bullet* UserBullet = (Bullet*)malloc(sizeof(Bullet) * BULLETMAX);
 	tmpSurface = IMG_Load("D:/Suyoung/code/c_games/2024/assets/weapon.png");
 	SDL_Texture* UserBulletTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
@@ -237,6 +247,7 @@ int main(int argc, char** argv)
 	}
 	if (UserBullet == NULL)
 	{
+		free(UserBullet);
 		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)");
 		SDL_DestroyWindow(window);
 		SDL_DestroyRenderer(renderer);
@@ -244,7 +255,50 @@ int main(int argc, char** argv)
 		exit(-1);
 	}
 	
-	// todo 기본 초기화
+	for (int i = 0; i < BULLETMAX; i++)
+	{
+		UserBullet[i].rect.w = 10;
+		UserBullet[i].rect.h = 10;
+		UserBullet[i].rect.x = User->rect.x + ((User->rect.w / 2) - (UserBullet[i].rect.w / 2));
+		UserBullet[i].rect.y = User->rect.y - UserBullet->rect.h;
+		UserBullet[i].speed = 0.7;
+		UserBullet[i].Onscreen = false;
+	}
+
+	// Enemy Bullet
+	Bullet* EnemyBullet = (Bullet*)malloc(sizeof(Bullet) * BULLETMAX);
+	tmpSurface = IMG_Load("D:/Suyoung/code/c_games/2024/assets/weapon.png");
+	SDL_Texture* EnemyBulletTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
+	SDL_FreeSurface(tmpSurface);
+
+	if (EnemyBullet == NULL)
+	{
+		free(EnemyBullet);
+		EnemyBullet = NULL;
+		EnemyBulletTex = NULL;
+		Bullet* EnemyBullet = (Bullet*)malloc(sizeof(Bullet) * BULLETMAX);
+		tmpSurface = IMG_Load("D:/Suyoung/code/c_games/2024/assets/weapon.png");
+		SDL_Texture* EnemyBulletTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
+		SDL_FreeSurface(tmpSurface);
+	}
+	if (EnemyBullet == NULL)
+	{
+		free(EnemyBullet);
+		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)");
+		SDL_DestroyWindow(window);
+		SDL_DestroyRenderer(renderer);
+		SDL_Quit();
+		exit(-1);
+	}
+
+	for (int i = 0; i < BULLETMAX; i++)
+	{
+		EnemyBullet[i].rect.w = 10;
+		EnemyBullet[i].rect.h = 10;
+		EnemyBullet[i].rect.x = Enemy->rect.x + ((Enemy->rect.w / 2) - (EnemyBullet[i].rect.w / 2));
+		EnemyBullet[i].rect.y = Enemy->rect.x;
+		EnemyBullet[i].speed = 0.7;
+	}
 
 
 
@@ -255,14 +309,18 @@ int main(int argc, char** argv)
 
 	/*COLLISION SETTING*/
 	bool UserEnemyC = false;
-	bool UserEnemyBulletC = false; //todo 총알 들어가있는거는 배열로 ㄱㄱ (총알 여러개니깐)
-	bool UserBulletEnemyC = false;
+	bool UserEnemyBulletC[BULLETMAX] = {false};
+	bool UserBulletEnemyC[BULLETMAX] = {false};
 
-
+	/*BULLET INDEX SETTING*/
+	int i = 0;
 
 	/*MAIN LOOP*/
 	while (isRunning)
 	{
+		/*BULLET INDEX SETTING*/
+		int i = 0;
+
 		/*FPS 1*/
 		frameStart = (Uint32)SDL_GetTicks64();
 
@@ -280,52 +338,38 @@ int main(int argc, char** argv)
 				case SDLK_ESCAPE:
 					isRunning = false;
 				case SDLK_w:
-					if (User != NULL)
-					{
-						User->speed.y = -0.4;
-					}
+					User->speed.y = -0.4;
 					break;
 				case SDLK_s:
-					if (User != NULL)
-					{
-						User->speed.y = 0.4;
-					}
+					User->speed.y = 0.4;
 					break;
 				case SDLK_a:
-					if (User != NULL)
-					{
-						User->speed.x = -0.4;
-					}
+					User->speed.x = -0.4;
 					break;
 				case SDLK_d:
-					if (User != NULL)
-					{
 						User->speed.x = 0.4;
-					}
 					break;
 				case SDLK_UP:
-					if (User != NULL)
-					{
 						User->speed.y = -0.4;
-					}
 					break;
 				case SDLK_DOWN:
-					if (User != NULL)
-					{
-						User->speed.y = 0.4;
-					}
+					User->speed.y = 0.4;
 					break;
 				case SDLK_LEFT:
-					if (User != NULL)
-					{
-						User->speed.x = -0.4;
-					}
+					User->speed.x = -0.4;
 					break;
 				case SDLK_RIGHT:
-					if (User != NULL)
+					User->speed.x = 0.4;
+					break;
+				case SDLK_SPACE:
+					UserBullet[i].speed = 0.7;
+					UserBullet[i].Onscreen = true;
+					/*BULLET INDEXING*/                                                                                                //눌르면 총알 발사되는것만 만들면 되 홧팅!
+					if (i >= BULLETMAX - 1)
 					{
-						User->speed.x = 0.4;
+						i = 0;
 					}
+					i++;
 					break;
 				default:
 					break;
@@ -334,53 +378,31 @@ int main(int argc, char** argv)
 			case SDL_KEYUP:
 				switch (event.key.keysym.sym)
 				{
+				case SDLK_ESCAPE:
+					isRunning = false;
 				case SDLK_w:
-					if (User != NULL)
-					{
-						User->speed.y = 0;
-					}
+					User->speed.y = 0;
 					break;
 				case SDLK_s:
-					if (User != NULL)
-					{
-						User->speed.y = 0;
-					}
+					User->speed.y = 0;
 					break;
 				case SDLK_a:
-					if (User != NULL)
-					{
-						User->speed.x = 0;
-					}
+					User->speed.x = 0;
 					break;
 				case SDLK_d:
-					if (User != NULL)
-					{
-						User->speed.x = 0;
-					}
+					User->speed.x = 0;
 					break;
 				case SDLK_UP:
-					if (User != NULL)
-					{
-						User->speed.y = 0;
-					}
+					User->speed.y = 0;
 					break;
 				case SDLK_DOWN:
-					if (User != NULL)
-					{
-						User->speed.y = 0;
-					}
+					User->speed.y = 0;
 					break;
 				case SDLK_LEFT:
-					if (User != NULL)
-					{
-						User->speed.x = -0;
-					}
+					User->speed.x = 0;
 					break;
 				case SDLK_RIGHT:
-					if (User != NULL)
-					{
-						User->speed.x = 0;
-					}
+					User->speed.x = 0;
 					break;
 				default:
 					break;
@@ -396,102 +418,102 @@ int main(int argc, char** argv)
 			// user and enemy
 			UserEnemyC = collision(User->rect, Enemy->rect);
 			// user's bullet and enemy
-			// todo 충돌 처리 마저 완성
 			for (int i = 0; i < BULLETMAX; i++)
 			{
-				UserBulletEnemyC = collision(UserBullet[i].rect, Enemy->rect);
+				UserBulletEnemyC[i] = collision(UserBullet[i].rect, Enemy->rect);
 			}
 
-			///////////////////////////////////////////////////////   !!!todo 널 체크 제거!!!
 
 			// User
-			if (User != NULL)
+			User->rect.x += (int)(User->speed.x * frameDelay);
+			User->rect.y += (int)(User->speed.y * frameDelay);
+
+			// wall collsion
 			{
-				User->rect.x += (int)(User->speed.x * frameDelay);
-				User->rect.y += (int)(User->speed.y * frameDelay);
-
-				// wall collsion
+				if (User->rect.y <= 0)
 				{
-					if (User->rect.y <= 0)
-					{
-						User->rect.y = 0;
-					}
-					else if (User->rect.y >= WINDOW_H - User->rect.h)
-					{
-						User->rect.y = WINDOW_H - User->rect.h;
-					}
-
-					if (User->rect.x <= 0)
-					{
-						User->rect.x = 0;
-					}
-
-					else if (User->rect.x >= WINDOW_W - User->rect.w)
-					{
-						User->rect.x = WINDOW_W - User->rect.w;
-					}
+					User->rect.y = 0;
+				}
+				else if (User->rect.y >= WINDOW_H - User->rect.h)
+				{
+					User->rect.y = WINDOW_H - User->rect.h;
 				}
 
-				if (UserEnemyC)
+				if (User->rect.x <= 0)
 				{
-					printf("Collision User and Enemy");
+					User->rect.x = 0;
+				}
+
+				else if (User->rect.x >= WINDOW_W - User->rect.w)
+				{
+					User->rect.x = WINDOW_W - User->rect.w;
+				}
+			}
+
+			// collision with others
+			if (UserEnemyC)
+			{
+				printf("Collision User and Enemy");
+			}
+
+			// User's Bullet
+			for (int i = 0; i < BULLETMAX; i++)
+			{
+				UserBullet[i].rect.x = User->rect.x + ((User->rect.w / 2) - (UserBullet[i].rect.w / 2));
+				UserBullet[i].rect.y = User->rect.y - UserBullet->rect.h;
+
+				if (UserBullet[i].Onscreen) // todo bullet moving                                                                                               //눌르면 총알 발사되는것만 만들면 되 홧팅!
+				{
+					UserBullet[i].rect.y += (int)(UserBullet[i].speed * frameDelay);
 				}
 			}
 
 			// Enemy
-			if (Enemy != NULL)
+			Enemy->rect.x += (int)(Enemy->speed.x * frameDelay);
+			Enemy->rect.y += (int)(Enemy->speed.y * frameDelay);
+
+			// wall collision
 			{
-				Enemy->rect.x += (int)(Enemy->speed.x * frameDelay);
-				Enemy->rect.y += (int)(Enemy->speed.y * frameDelay);
-
-				// wall collision
+				if (Enemy->rect.y <= 0)
 				{
-					if (Enemy->rect.y <= 0)
-					{
-						Enemy->rect.y = 0;
-					}
-					else if (Enemy->rect.y >= WINDOW_H - Enemy->rect.h)
-					{
-						Enemy->rect.y = WINDOW_H - Enemy->rect.h;
-					}
+					Enemy->rect.y = 0;
+				}
+				else if (Enemy->rect.y >= WINDOW_H - Enemy->rect.h)
+				{
+					Enemy->rect.y = WINDOW_H - Enemy->rect.h;
+				}
 
-					if (Enemy->rect.x <= 0)
-					{
-						Enemy->rect.x = 0;
-					}
+				if (Enemy->rect.x <= 0)
+				{
+					Enemy->rect.x = 0;
+				}
 
-					else if (Enemy->rect.x >= WINDOW_W - Enemy->rect.w)
-					{
-						Enemy->rect.x = WINDOW_W - Enemy->rect.w;
-					}
+				else if (Enemy->rect.x >= WINDOW_W - Enemy->rect.w)
+				{
+					Enemy->rect.x = WINDOW_W - Enemy->rect.w;
 				}
 			}
 
 			// Cloud
-			if (Cloud != NULL)
+			for (int i = 0; i < 2; i++)
 			{
-				for (int i = 0; i < 2; i++)
-				{
-					Cloud[i].rect.y += (int)(Cloud[i].speed.y * frameDelay);
+				Cloud[i].rect.y += (int)(Cloud[i].speed.y * frameDelay);
 
-					if (Cloud[i].rect.y >= WINDOW_H)
-					{
-						Cloud[i].rect.y = 0 - WINDOW_H;
-					}
+				if (Cloud[i].rect.y >= WINDOW_H)
+				{
+					Cloud[i].rect.y = 0 - WINDOW_H;
 				}
 			}
 
 			// Ocean
-			if (Ocean != NULL)
-			{
-				for (int i = 0; i < 2; i++)
-				{
-					Ocean[i].rect.y += (int)(Ocean[i].speed.y * frameDelay);
 
-					if (Ocean[i].rect.y >= WINDOW_H)
-					{
-						Ocean[i].rect.y = 0 - WINDOW_H;
-					}
+			for (int i = 0; i < 2; i++)
+			{
+				Ocean[i].rect.y += (int)(Ocean[i].speed.y * frameDelay);
+
+				if (Ocean[i].rect.y >= WINDOW_H)
+				{
+					Ocean[i].rect.y = 0 - WINDOW_H;
 				}
 			}
 		}
@@ -500,7 +522,7 @@ int main(int argc, char** argv)
 		{
 			SDL_RenderClear(renderer);
 
-			// Ocean
+			// Ocean   // 널체킹 빼자!!!
 			if (Ocean != NULL)
 			{
 				for (int i = 0; i < 2; i++)
@@ -533,6 +555,15 @@ int main(int argc, char** argv)
 				}
 			}
 
+			// User's Bullet
+			for (int i = 0; i < BULLETMAX; i++)
+			{
+				if (UserBullet[i].Onscreen)
+				{
+					SDL_RenderCopy(renderer, UserBulletTex, NULL, &UserBullet[i].rect);
+				}
+			}
+
 			// Enemy
 			if (Enemy != NULL)
 			{
@@ -544,6 +575,8 @@ int main(int argc, char** argv)
 
 			SDL_RenderPresent(renderer);
 		}
+
+
 
 		/*FPS 2*/
 		{
