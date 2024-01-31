@@ -1,10 +1,11 @@
 ﻿#include "include.h"
 
 
-#define WINDOW_W 960
-#define WINDOW_H 1280
+#define WINDOW_W 480
+#define WINDOW_H 640
 
 #define TMPMAX 10
+#define BULLETMAX 20
 
 typedef struct _Vector
 {
@@ -37,6 +38,16 @@ typedef struct _Plane
 	bool gameover = false;
 }Plane;
 
+typedef struct _Bullet
+{
+	SDL_Rect rect = {};
+	int speed = 0;
+	bool Onscreen = false;
+}Bullet;
+
+
+bool collision(SDL_Rect A, SDL_Rect B);
+
 bool isRunning = true;
 
 int main(int argc, char** argv)
@@ -49,135 +60,205 @@ int main(int argc, char** argv)
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	}
 
-	// FPS SETTING
+
+
+	/*FPS SETTING*/
 	// !!!!!FPS_MAX = 100!!!!! //
 	const int FPS = 100;
 	const int frameDelay = 1000 / FPS;
 	Uint32 frameStart;
 	Uint32 frameTime;
 
+
+
 	/* LOAD IMAGES AND DEFINE IMAGE RECT */
 	// !!!!! SPEED_MIN = 1/frameDelay !!!!! //
 	SDL_Surface* tmpSurface;
-
-	// example
-	Entity* tmp = (Entity*)malloc(sizeof(Entity) * TMPMAX);
-	tmpSurface = IMG_Load("assets/Blue.png");
-	SDL_Texture* TmpTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
-	SDL_FreeSurface(tmpSurface);
-
-	if (tmp == NULL)
-	{
-		Entity* tmp = (Entity*)malloc(sizeof(Entity) * TMPMAX);
-		tmpSurface = IMG_Load("assets/Blue.png");
-		SDL_FreeSurface(tmpSurface);
-	}
-
-	if (tmp != NULL)
-	{
-		for (int i = 0; i < TMPMAX; i++)
-		{
-			tmp[i].rect.w = 64;
-			tmp[i].rect.h = 64;
-			tmp[i].rect.x = -i * 128;
-			tmp[i].rect.y = WINDOW_H / 2 - tmp[i].rect.h / 2;
-			tmp[i].speed.x = 2;
-			tmp[i].speed.y = 0;
-			tmp[i].Onscreen = false;
-		}
-	}
 
 	// Ocean
 	Background* Ocean = (Background*)malloc(sizeof(Background) * 2);
 	tmpSurface = IMG_Load("assets/background_sea.png");
 	SDL_Texture* OceanTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 	SDL_FreeSurface(tmpSurface);
-
 	if (Ocean == NULL)
 	{
+		free(Ocean);
+		Ocean = NULL;
+		OceanTex = NULL;
 		Background* Ocean = (Background*)malloc(sizeof(Background) * 2);
 		tmpSurface = IMG_Load("assets/background_sea.png");
+		SDL_Texture* OceanTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 		SDL_FreeSurface(tmpSurface);
 	}
-
-	if (Ocean != NULL)
+	if (Ocean == NULL)
 	{
-		Ocean[0].rect.w = WINDOW_W;
-		Ocean[0].rect.h = WINDOW_H;
-		Ocean[0].rect.x = 0;
-		Ocean[0].rect.y = 0;
-		Ocean[0].speed.x = 0;
-		Ocean[0].speed.y = 0.4;
-		Ocean[0].Onscreen = true;
-		Ocean[1].rect.w = WINDOW_W;
-		Ocean[1].rect.h = WINDOW_H;
-		Ocean[1].rect.x = 0;
-		Ocean[1].rect.y = 0 - WINDOW_H;
-		Ocean[1].speed.x = 0;
-		Ocean[1].speed.y = 0.4; // It should be "even" number. If you set it odd number, you will see black line.
-		Ocean[1].Onscreen = true;
+		free(Ocean);
+		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)");
+		SDL_DestroyWindow(window);
+		SDL_DestroyRenderer(renderer);
+		SDL_Quit();
+		exit(-1);
 	}
+	Ocean[0].rect.w = WINDOW_W;
+	Ocean[0].rect.h = WINDOW_H;
+	Ocean[0].rect.x = 0;
+	Ocean[0].rect.y = 0;
+	Ocean[0].speed.x = 0;
+	Ocean[0].speed.y = 0.4;
+	Ocean[0].Onscreen = true;
+	Ocean[1].rect.w = WINDOW_W;
+	Ocean[1].rect.h = WINDOW_H;
+	Ocean[1].rect.x = 0;
+	Ocean[1].rect.y = 0 - WINDOW_H;
+	Ocean[1].speed.x = 0;
+	Ocean[1].speed.y = 0.4; // It should be "even" number. If you set it odd number, you will see black line.
+	Ocean[1].Onscreen = true;
 
 	// Cloud
 	Background* Cloud = (Background*)malloc(sizeof(Background) * 2);
 	tmpSurface = IMG_Load("assets/cloud.png");
 	SDL_Texture* CloudTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 	SDL_FreeSurface(tmpSurface);
-
 	if (Cloud == NULL)
 	{
+		free(Cloud);
+		Cloud = NULL;
+		CloudTex = NULL;
 		Background* Cloud = (Background*)malloc(sizeof(Background) * 2);
 		tmpSurface = IMG_Load("assets/cloud.png");
+		SDL_Texture* CloudTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 		SDL_FreeSurface(tmpSurface);
 	}
-
-	if (Cloud != NULL)
+	if (Cloud == NULL)
 	{
-		Cloud[0].rect.w = WINDOW_W;
-		Cloud[0].rect.h = WINDOW_H;
-		Cloud[0].rect.y = 0;
-		Cloud[0].rect.x = 0;
-		Cloud[0].speed.x = 0;
-		Cloud[0].speed.y = 0.1;
-		Cloud[0].Onscreen = true;
-		Cloud[1].rect.w = WINDOW_W;
-		Cloud[1].rect.h = WINDOW_H;
-		Cloud[1].rect.x = 0;
-		Cloud[1].rect.y = 0 - WINDOW_H;
-		Cloud[1].speed.x = 0;
-		Cloud[1].speed.y = 0.1;
-		Cloud[1].Onscreen = true;
+		free(Cloud);
+		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)");
+		SDL_DestroyWindow(window);
+		SDL_DestroyRenderer(renderer);
+		SDL_Quit();
+		exit(-1);
 	}
+	Cloud[0].rect.w = WINDOW_W;
+	Cloud[0].rect.h = WINDOW_H;
+	Cloud[0].rect.y = 0;
+	Cloud[0].rect.x = 0;
+	Cloud[0].speed.x = 0;
+	Cloud[0].speed.y = 0.1;
+	Cloud[0].Onscreen = true;
+	Cloud[1].rect.w = WINDOW_W;
+	Cloud[1].rect.h = WINDOW_H;
+	Cloud[1].rect.x = 0;
+	Cloud[1].rect.y = 0 - WINDOW_H;
+	Cloud[1].speed.x = 0;
+	Cloud[1].speed.y = 0.1;
+	Cloud[1].Onscreen = true;
 
 	// User
 	Plane* User = (Plane*)malloc(sizeof(Plane) * 1);
 	tmpSurface = IMG_Load("D:/Suyoung/code/c_games/2024/assets/User.png");
 	SDL_Texture* UserTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 	SDL_FreeSurface(tmpSurface);
-
 	if (User == NULL)
 	{
+		free(User);
+		User = NULL;
+		UserTex = NULL;
 		Plane* User = (Plane*)malloc(sizeof(Plane) * 1);
 		tmpSurface = IMG_Load("D:/Suyoung/code/c_games/2024/assets/User.png");
+		SDL_Texture* UserTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 		SDL_FreeSurface(tmpSurface);
 	}
-
-	if (User != NULL)
+	if (User == NULL)
 	{
-		User->rect.w = 64;
-		User->rect.h = 64;
-		User->rect.x = WINDOW_W / 2 - (User->rect.w / 2);
-		User->rect.y = WINDOW_H - User->rect.h;
-		User->speed.x = 0;
-		User->speed.y = 0;
-		User->health = 100;
-		User->gameover = false;
-		User->Onscreen = true;
+		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)");
+		SDL_DestroyWindow(window);
+		SDL_DestroyRenderer(renderer);
+		SDL_Quit();
+		exit(-1);
 	}
+	User->rect.w = 64;
+	User->rect.h = 64;
+	User->rect.x = WINDOW_W / 2 - (User->rect.w / 2);
+	User->rect.y = WINDOW_H - User->rect.h;
+	User->speed.x = 0;
+	User->speed.y = 0;
+	User->health = 100;
+	User->gameover = false;
+	User->Onscreen = true;
+
+	// Enemy
+	Plane* Enemy = (Plane*)malloc(sizeof(Plane) * 1);
+	tmpSurface = IMG_Load("D:/Suyoung/code/c_games/2024/assets/enemy.png");
+	SDL_Texture* EnemyTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
+	SDL_FreeSurface(tmpSurface);
+	if (Enemy == NULL)
+	{
+		free(Enemy);
+		Enemy = NULL;
+		EnemyTex = NULL;
+		Plane* Enemy = (Plane*)malloc(sizeof(Plane) * 1);
+		tmpSurface = IMG_Load("D:/Suyoung/code/c_games/2024/assets/enemy.png");
+		SDL_Texture* EnemyTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
+		SDL_FreeSurface(tmpSurface);
+	}
+	if (Enemy == NULL)
+	{
+		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)");
+		SDL_DestroyWindow(window);
+		SDL_DestroyRenderer(renderer);
+		SDL_Quit();
+		exit(-1);
+	}
+	Enemy->rect.w = 64;
+	Enemy->rect.h = 64;
+	Enemy->rect.x = WINDOW_W / 2 - (Enemy->rect.w / 2);
+	Enemy->rect.y = 0;
+	Enemy->speed.x = 0;
+	Enemy->speed.y = 0;
+	Enemy->health = 100;
+	Enemy->gameover = false;
+	Enemy->Onscreen = true;
+
+	// User Bullet
+	Bullet* UserBullet = (Bullet*)malloc(sizeof(Bullet) * BULLETMAX);
+	tmpSurface = IMG_Load("D:/Suyoung/code/c_games/2024/assets/weapon.png");
+	SDL_Texture* UserBulletTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
+	SDL_FreeSurface(tmpSurface);
+
+	if (UserBullet == NULL)
+	{
+		free(UserBullet);
+		UserBullet = NULL;
+		UserBulletTex = NULL;
+		Bullet* UserBullet = (Bullet*)malloc(sizeof(Bullet) * BULLETMAX);
+		tmpSurface = IMG_Load("D:/Suyoung/code/c_games/2024/assets/weapon.png");
+		SDL_Texture* UserBulletTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
+		SDL_FreeSurface(tmpSurface);
+	}
+	if (UserBullet == NULL)
+	{
+		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)");
+		SDL_DestroyWindow(window);
+		SDL_DestroyRenderer(renderer);
+		SDL_Quit();
+		exit(-1);
+	}
+	
+	// todo 기본 초기화
 
 
 
+	/*EVENT SETTING*/
 	SDL_Event event;
+
+
+
+	/*COLLISION SETTING*/
+	bool UserEnemyC = false;
+	bool UserEnemyBulletC = false; //todo 총알 들어가있는거는 배열로 ㄱㄱ (총알 여러개니깐)
+	bool UserBulletEnemyC = false;
+
+
 
 	/*MAIN LOOP*/
 	while (isRunning)
@@ -186,284 +267,328 @@ int main(int argc, char** argv)
 		frameStart = (Uint32)SDL_GetTicks64();
 
 		/*EVENT*/
-		SDL_PollEvent(&event);
-		switch (event.type)
 		{
-		case SDL_QUIT:
-			isRunning = false;
-			break;
-		case SDL_KEYDOWN:
-			switch (event.key.keysym.sym)
+			SDL_PollEvent(&event);
+			switch (event.type)
 			{
-			case SDLK_ESCAPE:
+			case SDL_QUIT:
 				isRunning = false;
-			case SDLK_w:
-				if (User != NULL)
+				break;
+			case SDL_KEYDOWN:
+				switch (event.key.keysym.sym)
 				{
-					User->speed.y = -0.4;
+				case SDLK_ESCAPE:
+					isRunning = false;
+				case SDLK_w:
+					if (User != NULL)
+					{
+						User->speed.y = -0.4;
+					}
+					break;
+				case SDLK_s:
+					if (User != NULL)
+					{
+						User->speed.y = 0.4;
+					}
+					break;
+				case SDLK_a:
+					if (User != NULL)
+					{
+						User->speed.x = -0.4;
+					}
+					break;
+				case SDLK_d:
+					if (User != NULL)
+					{
+						User->speed.x = 0.4;
+					}
+					break;
+				case SDLK_UP:
+					if (User != NULL)
+					{
+						User->speed.y = -0.4;
+					}
+					break;
+				case SDLK_DOWN:
+					if (User != NULL)
+					{
+						User->speed.y = 0.4;
+					}
+					break;
+				case SDLK_LEFT:
+					if (User != NULL)
+					{
+						User->speed.x = -0.4;
+					}
+					break;
+				case SDLK_RIGHT:
+					if (User != NULL)
+					{
+						User->speed.x = 0.4;
+					}
+					break;
+				default:
+					break;
 				}
 				break;
-			case SDLK_s:
-				if (User != NULL)
+			case SDL_KEYUP:
+				switch (event.key.keysym.sym)
 				{
-					User->speed.y = 0.4;
+				case SDLK_w:
+					if (User != NULL)
+					{
+						User->speed.y = 0;
+					}
+					break;
+				case SDLK_s:
+					if (User != NULL)
+					{
+						User->speed.y = 0;
+					}
+					break;
+				case SDLK_a:
+					if (User != NULL)
+					{
+						User->speed.x = 0;
+					}
+					break;
+				case SDLK_d:
+					if (User != NULL)
+					{
+						User->speed.x = 0;
+					}
+					break;
+				case SDLK_UP:
+					if (User != NULL)
+					{
+						User->speed.y = 0;
+					}
+					break;
+				case SDLK_DOWN:
+					if (User != NULL)
+					{
+						User->speed.y = 0;
+					}
+					break;
+				case SDLK_LEFT:
+					if (User != NULL)
+					{
+						User->speed.x = -0;
+					}
+					break;
+				case SDLK_RIGHT:
+					if (User != NULL)
+					{
+						User->speed.x = 0;
+					}
+					break;
+				default:
+					break;
 				}
-				break;
-			case SDLK_a:
-				if (User != NULL)
-				{
-					User->speed.x = -0.4;
-				}
-				break;
-			case SDLK_d:
-				if (User != NULL)
-				{
-					User->speed.x = 0.4;
-				}
-				break;
-			case SDLK_UP:
-				if (User != NULL)
-				{
-					User->speed.y = -0.4;
-				}
-				break;
-			case SDLK_DOWN:
-				if (User != NULL)
-				{
-					User->speed.y = 0.4;
-				}
-				break;
-			case SDLK_LEFT:
-				if (User != NULL)
-				{
-					User->speed.x = -0.4;
-				}
-				break;
-			case SDLK_RIGHT:
-				if (User != NULL)
-				{
-					User->speed.x = 0.4;
-				}
-				break;
 			default:
 				break;
 			}
-			break;
-		case SDL_KEYUP:
-			switch (event.key.keysym.sym)
-			{
-			case SDLK_w:
-				if (User != NULL)
-				{
-					User->speed.y = 0;
-				}
-				break;
-			case SDLK_s:
-				if (User != NULL)
-				{
-					User->speed.y = 0;
-				}
-				break;
-			case SDLK_a:
-				if (User != NULL)
-				{
-					User->speed.x = 0;
-				}
-				break;
-			case SDLK_d:
-				if (User != NULL)
-				{
-					User->speed.x = 0;
-				}
-				break;
-			case SDLK_UP:
-				if (User != NULL)
-				{
-					User->speed.y = 0;
-				}
-				break;
-			case SDLK_DOWN:
-				if (User != NULL)
-				{
-					User->speed.y = 0;
-				}
-				break;
-			case SDLK_LEFT:
-				if (User != NULL)
-				{
-					User->speed.x = -0;
-				}
-				break;
-			case SDLK_RIGHT:
-				if (User != NULL)
-				{
-					User->speed.x = 0;
-				}
-				break;
-			default:
-				break;
-			}
-		default:
-			break;
 		}
 
 		/*UPDATE*/
-
-		// example
-		if (tmp != NULL)
 		{
-			for (int i = 0; i < TMPMAX; i++)
+			// Check Collision
+			// user and enemy
+			UserEnemyC = collision(User->rect, Enemy->rect);
+			// user's bullet and enemy
+			// todo 충돌 처리 마저 완성
+			for (int i = 0; i < BULLETMAX; i++)
 			{
-				tmp[i].rect.x += (int)(tmp[i].speed.x * frameDelay);
-				tmp[i].rect.y += (int)(tmp[i].speed.y * frameDelay);
-			}
-		}
-
-		// User
-
-		if (User != NULL)
-		{
-			User->rect.x += (int)(User->speed.x * frameDelay);
-			User->rect.y += (int)(User->speed.y * frameDelay);
-
-			if (User->rect.y <= 0)
-			{
-				User->rect.y = 0;
-			}
-			else if (User->rect.y >= WINDOW_H - User->rect.h)
-			{
-				User->rect.y = WINDOW_H - User->rect.h;
+				UserBulletEnemyC = collision(UserBullet[i].rect, Enemy->rect);
 			}
 
-			if (User->rect.x <= 0)
-			{
-				User->rect.x = 0;
-			}
+			///////////////////////////////////////////////////////   !!!todo 널 체크 제거!!!
 
-			else if (User->rect.x >= WINDOW_W - User->rect.w)
+			// User
+			if (User != NULL)
 			{
-				User->rect.x = WINDOW_W - User->rect.w;
-			}
-		}
+				User->rect.x += (int)(User->speed.x * frameDelay);
+				User->rect.y += (int)(User->speed.y * frameDelay);
 
-		// Cloud
-		if (Cloud != NULL)
-		{
-			for (int i = 0; i < 2; i++)
-			{
-				Cloud[i].rect.y += (int)(Cloud[i].speed.y * frameDelay);
-
-				if (Cloud[i].rect.y >= WINDOW_H)
+				// wall collsion
 				{
-					Cloud[i].rect.y = 0 - WINDOW_H;
+					if (User->rect.y <= 0)
+					{
+						User->rect.y = 0;
+					}
+					else if (User->rect.y >= WINDOW_H - User->rect.h)
+					{
+						User->rect.y = WINDOW_H - User->rect.h;
+					}
+
+					if (User->rect.x <= 0)
+					{
+						User->rect.x = 0;
+					}
+
+					else if (User->rect.x >= WINDOW_W - User->rect.w)
+					{
+						User->rect.x = WINDOW_W - User->rect.w;
+					}
+				}
+
+				if (UserEnemyC)
+				{
+					printf("Collision User and Enemy");
 				}
 			}
-		}
 
-		// Ocean
-		if (Ocean != NULL)
-		{
-			for (int i = 0; i < 2; i++)
+			// Enemy
+			if (Enemy != NULL)
 			{
-				Ocean[i].rect.y += (int)(Ocean[i].speed.y * frameDelay);
+				Enemy->rect.x += (int)(Enemy->speed.x * frameDelay);
+				Enemy->rect.y += (int)(Enemy->speed.y * frameDelay);
 
-				if (Ocean[i].rect.y >= WINDOW_H)
+				// wall collision
 				{
-					Ocean[i].rect.y = 0 - WINDOW_H;
+					if (Enemy->rect.y <= 0)
+					{
+						Enemy->rect.y = 0;
+					}
+					else if (Enemy->rect.y >= WINDOW_H - Enemy->rect.h)
+					{
+						Enemy->rect.y = WINDOW_H - Enemy->rect.h;
+					}
+
+					if (Enemy->rect.x <= 0)
+					{
+						Enemy->rect.x = 0;
+					}
+
+					else if (Enemy->rect.x >= WINDOW_W - Enemy->rect.w)
+					{
+						Enemy->rect.x = WINDOW_W - Enemy->rect.w;
+					}
+				}
+			}
+
+			// Cloud
+			if (Cloud != NULL)
+			{
+				for (int i = 0; i < 2; i++)
+				{
+					Cloud[i].rect.y += (int)(Cloud[i].speed.y * frameDelay);
+
+					if (Cloud[i].rect.y >= WINDOW_H)
+					{
+						Cloud[i].rect.y = 0 - WINDOW_H;
+					}
+				}
+			}
+
+			// Ocean
+			if (Ocean != NULL)
+			{
+				for (int i = 0; i < 2; i++)
+				{
+					Ocean[i].rect.y += (int)(Ocean[i].speed.y * frameDelay);
+
+					if (Ocean[i].rect.y >= WINDOW_H)
+					{
+						Ocean[i].rect.y = 0 - WINDOW_H;
+					}
 				}
 			}
 		}
 
 		/*RENDERER*/
-
-		SDL_RenderClear(renderer);
-
-		// Ocean
-		if (Ocean != NULL)
 		{
-			for (int i = 0; i < 2; i++)
+			SDL_RenderClear(renderer);
+
+			// Ocean
+			if (Ocean != NULL)
 			{
-				if (Ocean[i].Onscreen == true)
+				for (int i = 0; i < 2; i++)
 				{
-					SDL_RenderCopy(renderer, OceanTex, NULL, &Ocean[i].rect);
+					if (Ocean[i].Onscreen == true)
+					{
+						SDL_RenderCopy(renderer, OceanTex, NULL, &Ocean[i].rect);
+					}
 				}
 			}
-		}
 
-		// Cloud
-		if (Cloud != NULL)
-		{
-			for (int i = 0; i < 2; i++)
+			// Cloud
+			if (Cloud != NULL)
 			{
-				if (Cloud[i].Onscreen == true)
+				for (int i = 0; i < 2; i++)
 				{
-					SDL_RenderCopy(renderer, CloudTex, NULL, &Cloud[i].rect);
+					if (Cloud[i].Onscreen == true)
+					{
+						SDL_RenderCopy(renderer, CloudTex, NULL, &Cloud[i].rect);
+					}
 				}
 			}
-		}
 
-		// User
-		if (User != NULL)
-		{
-			if (User->Onscreen == true)
+			// User
+			if (User != NULL)
 			{
-				SDL_RenderCopy(renderer, UserTex, NULL, &User->rect);
-			}
-		}
-
-		// example
-		if (tmp != NULL)
-		{
-			for (int i = 0; i < TMPMAX; i++)
-			{
-				if (tmp[i].Onscreen == true)
+				if (User->Onscreen == true)
 				{
-					SDL_RenderCopy(renderer, TmpTex, NULL, &tmp[i].rect);
+					SDL_RenderCopy(renderer, UserTex, NULL, &User->rect);
 				}
 			}
-		}
 
-		SDL_RenderPresent(renderer);
+			// Enemy
+			if (Enemy != NULL)
+			{
+				if (Enemy->Onscreen == true)
+				{
+					SDL_RenderCopy(renderer, EnemyTex, NULL, &Enemy->rect);
+				}
+			}
+
+			SDL_RenderPresent(renderer);
+		}
 
 		/*FPS 2*/
-		frameTime = (Uint32)SDL_GetTicks64() - frameStart;
-		if (frameDelay > frameTime)
 		{
-			SDL_Delay(frameDelay - frameTime);
+			frameTime = (Uint32)SDL_GetTicks64() - frameStart;
+			if (frameDelay > frameTime)
+			{
+				SDL_Delay(frameDelay - frameTime);
+			}
 		}
 	}
 
+
+
 	/*EXIT*/
-
-	// Memory
-	if (tmp != NULL)
 	{
-		free(tmp);
-		tmp = NULL;
-	}
 
+		if (Ocean != NULL)
+		{
+			free(Ocean);
+			Ocean = NULL;
+		}
 
-	if (Ocean != NULL)
-	{
-		free(Ocean);
-		Ocean = NULL;
-	}
+		if (Cloud != NULL)
+		{
+			free(Cloud);
+			Cloud = NULL;
+		}
 
-	if (Cloud != NULL)
-	{
-		free(Cloud);
-		Cloud = NULL;
-	}
+		if (User != NULL)
+		{
+			free(User);
+			User = NULL;
+		}
 
-	if (User != NULL)
-	{
-		free(User);
-		User = NULL;
+		if (Enemy != NULL)
+		{
+			free(Enemy);
+			Enemy = NULL;
+		}
+
+		// SDL
+		SDL_DestroyWindow(window);
+		SDL_DestroyRenderer(renderer);
+		SDL_Quit();
 	}
-	// SDL
-	SDL_DestroyWindow(window);
-	SDL_DestroyRenderer(renderer);
-	SDL_Quit();
 
 	return 0;
 }
