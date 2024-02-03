@@ -142,6 +142,22 @@
   <ItemGroup>
     <ClInclude Include="include.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\background.png" />
+    <Image Include="assets\background_sea.png" />
+    <Image Include="assets\Blue.png" />
+    <Image Include="assets\character.png" />
+    <Image Include="assets\character_test_3.png" />
+    <Image Include="assets\cloud.png" />
+    <Image Include="assets\enemy.png" />
+    <Image Include="assets\enemy_test_2.png" />
+    <Image Include="assets\enemy_weapon.png" />
+    <Image Include="assets\Green.png" />
+    <Image Include="assets\Red.png" />
+    <Image Include="assets\start_background.png" />
+    <Image Include="assets\User.png" />
+    <Image Include="assets\weapon.png" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

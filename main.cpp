@@ -10,6 +10,8 @@
 	- 각종 효과음 넣기
 	- 메인화면 만들기
 	- 배포할 .exe 파일로 만들기
+	- 코드 분할하기
+
 */
 
 #include "include.h"
@@ -27,14 +29,6 @@ typedef struct _Vector
 	double y = 0;
 } Vector;
 
-typedef struct _Entity
-{
-	SDL_Rect rect = {};
-	Vector speed = {};
-	unsigned short int health = 100;
-	bool Onscreen = false;
-}Entity;
-
 typedef struct _Background
 {
 	SDL_Rect rect = {};
@@ -46,6 +40,7 @@ typedef struct _Plane
 {
 	SDL_Rect rect = {};
 	Vector speed = {};
+	Vector CollisionWithWall = {};
 	unsigned short int health = 100;
 	bool Onscreen = false;
 	bool launchBullet = false;
@@ -55,12 +50,14 @@ typedef struct _Plane
 typedef struct _Bullet
 {
 	SDL_Rect rect = {};
+	Vector CollisionWithWall = {};
 	double speed = 0.7;
 	bool Onscreen = false;
 }Bullet;
 
 
 bool collision(SDL_Rect A, SDL_Rect B);
+Vector wallCollision(SDL_Rect A, int window_W, int window_H);
 
 bool isRunning = true;
 
@@ -200,6 +197,7 @@ int main(int argc, char** argv)
 	User->health = 100;
 	User->gameover = false;
 	User->Onscreen = true;
+	User->CollisionWithWall = { 0 };
 
 	// Enemy
 	Plane* Enemy = (Plane*)malloc(sizeof(Plane) * 1);
@@ -234,6 +232,7 @@ int main(int argc, char** argv)
 	Enemy->health = 100;
 	Enemy->gameover = false;
 	Enemy->Onscreen = true;
+	Enemy->CollisionWithWall = { 0 };
 
 	// User's Bullet
 	Bullet* UserBullet = (Bullet*)malloc(sizeof(Bullet) * BULLETMAX);
@@ -269,6 +268,7 @@ int main(int argc, char** argv)
 		UserBullet[i].rect.y = User->rect.y - UserBullet->rect.h;
 		UserBullet[i].speed = 0.7;
 		UserBullet[i].Onscreen = false;
+		UserBullet[i].CollisionWithWall = { 0 };
 	}
 
 
@@ -286,7 +286,8 @@ int main(int argc, char** argv)
 	int bulletIndex = 0;
 
 	/*MAKING RANDOM NUMBER SEED*/
-	srand((unsigned int)time(NULL));
+	srand((unsigned int)time(NULL) + rand() * time(NULL));
+	srand((unsigned int)time(NULL) * rand() + time(NULL));
 
 	/*MAIN LOOP*/
 	while (isRunning)
@@ -405,32 +406,32 @@ int main(int argc, char** argv)
 			{
 				UserBulletEnemyC[i] = collision(UserBullet[i].rect, Enemy->rect);
 			}
-
+			// user and wall
+			
 
 			// User
 			User->rect.x += (int)(User->speed.x * frameDelay);
 			User->rect.y += (int)(User->speed.y * frameDelay);
 
 			// wall collsion
+			
+			if (User->rect.y <= 0)
 			{
-				if (User->rect.y <= 0)
-				{
-					User->rect.y = 0;
-				}
-				else if (User->rect.y >= WINDOW_H - User->rect.h)
-				{
-					User->rect.y = WINDOW_H - User->rect.h;
-				}
+				User->rect.y = 0;
+			}
+			else if (User->rect.y >= WINDOW_H - User->rect.h)
+			{
+				User->rect.y = WINDOW_H - User->rect.h;
+			}
 
-				if (User->rect.x <= 0)
-				{
-					User->rect.x = 0;
-				}
+			if (User->rect.x <= 0)
+			{
+				User->rect.x = 0;
+			}
 
-				else if (User->rect.x >= WINDOW_W - User->rect.w)
-				{
-					User->rect.x = WINDOW_W - User->rect.w;
-				}
+			else if (User->rect.x >= WINDOW_W - User->rect.w)
+			{
+				User->rect.x = WINDOW_W - User->rect.w;
 			}
 
 
@@ -627,6 +628,10 @@ int main(int argc, char** argv)
 			User = NULL;
 		}
 
+
+		free(UserBullet);
+		UserBullet = NULL;
+
 		if (Enemy != NULL)
 		{
 			free(Enemy);
@@ -654,4 +659,26 @@ bool collision(SDL_Rect A, SDL_Rect B)
 	}
 
 	return resault;
+}
+
+Vector wallCollision(SDL_Rect A, int window_W, int window_H)
+{
+	Vector result = { 0 };
+	if (A.y <= 0)
+	{
+		result.y = -1;
+	}
+	else if (A.y >= window_H - A.h)
+	{
+		result.y = 1;
+	}
+	if (A.x <= 0)
+	{
+		result.x = -1;
+	}
+	else if (A.x >= window_W - A.w)
+	{
+		result.x = 1;
+	}
+	return result;
 }

@@ -24,4 +24,48 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\background.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="assets\background_sea.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="assets\Blue.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="assets\character.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="assets\character_test_3.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="assets\cloud.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="assets\enemy.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="assets\enemy_test_2.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="assets\enemy_weapon.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="assets\Green.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="assets\Red.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="assets\start_background.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="assets\User.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="assets\weapon.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+  </ItemGroup>
 </Project>
