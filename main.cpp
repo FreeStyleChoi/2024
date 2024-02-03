@@ -230,7 +230,7 @@ int main(int argc, char** argv)
 	Enemy->rect.x = WINDOW_W / 2 - (Enemy->rect.w / 2);
 	Enemy->rect.y = 0;
 	Enemy->speed.x = 0;
-	Enemy->speed.y = 0;
+	Enemy->speed.y = 0.3;
 	Enemy->health = 100;
 	Enemy->gameover = false;
 	Enemy->Onscreen = true;
@@ -285,9 +285,13 @@ int main(int argc, char** argv)
 	/*BULLET INDEX SETTING*/
 	int bulletIndex = 0;
 
+	/*MAKING RANDOM NUMBER SEED*/
+	srand((unsigned int)time(NULL));
+
 	/*MAIN LOOP*/
 	while (isRunning)
 	{
+
 
 		/*FPS 1*/
 		frameStart = (Uint32)SDL_GetTicks64();
@@ -313,9 +317,11 @@ int main(int argc, char** argv)
 					break;
 				case SDLK_a:
 					User->speed.x = -0.4;
+					Enemy->speed.x = -0.4;
 					break;
 				case SDLK_d:
 						User->speed.x = 0.4;
+						Enemy->speed.x = 0.4;
 					break;
 				case SDLK_UP:
 						User->speed.y = -0.4;
@@ -325,9 +331,11 @@ int main(int argc, char** argv)
 					break;
 				case SDLK_LEFT:
 					User->speed.x = -0.4;
+					Enemy->speed.x = -0.4;
 					break;
 				case SDLK_RIGHT:
 					User->speed.x = 0.4;
+					Enemy->speed.x = 0.4;
 					break;
 				case SDLK_SPACE:
 					/*BULLET INDEXING*/                                                                                                //눌르면 총알 발사되는것만 만들면 되 홧팅!
@@ -359,9 +367,11 @@ int main(int argc, char** argv)
 					break;
 				case SDLK_a:
 					User->speed.x = 0;
+					Enemy->speed.x = 0;
 					break;
 				case SDLK_d:
 					User->speed.x = 0;
+					Enemy->speed.x = 0;
 					break;
 				case SDLK_UP:
 					User->speed.y = 0;
@@ -371,9 +381,11 @@ int main(int argc, char** argv)
 					break;
 				case SDLK_LEFT:
 					User->speed.x = 0;
+					Enemy->speed.x = 0;
 					break;
 				case SDLK_RIGHT:
 					User->speed.x = 0;
+					Enemy->speed.x = 0;
 					break;
 				default:
 					break;
@@ -421,6 +433,7 @@ int main(int argc, char** argv)
 				}
 			}
 
+
 			// collision with others
 			if (UserEnemyC)
 			{
@@ -430,25 +443,25 @@ int main(int argc, char** argv)
 			// User's Bullet
 			for (int i = 0; i < BULLETMAX; i++)
 			{
-				if (UserBullet[i].Onscreen == true) // todo bullet moving                                                                                               //눌르면 총알 발사되는것만 만들면 되 홧팅!
+				if (UserBullet[i].Onscreen == true)
 				{
 					UserBullet[i].rect.y -= (int)(UserBullet[i].speed * frameDelay);
 				}
 				else
 				{
-					UserBullet[i].rect.y = User->rect.y - UserBullet->rect.h;
+					UserBullet[i].rect.y = User->rect.y;
 					UserBullet[i].rect.x = User->rect.x + ((User->rect.w / 2) - (UserBullet[i].rect.w / 2));
 				}
 
 				// collision
-				if (UserBulletEnemyC[i] == true)
+				if (UserBulletEnemyC[i] == true && UserBullet[i].Onscreen == true)
 				{
 					printf("collision user's bullet and enemy");
 					UserBullet[i].Onscreen = false;
 					bulletIndex--;
 				}
 				// wall collision
-				if (UserBullet[i].rect.y <= 0)
+				if (UserBullet[i].rect.y <= 0 && UserBullet[i].Onscreen == true)
 				{
 					UserBullet[i].Onscreen = false;
 					bulletIndex--;
@@ -459,6 +472,21 @@ int main(int argc, char** argv)
 			Enemy->rect.x += (int)(Enemy->speed.x * frameDelay);
 			Enemy->rect.y += (int)(Enemy->speed.y * frameDelay);
 
+			// collision
+			if (UserEnemyC == true)
+			{
+				Enemy->rect.y = 0;
+				Enemy->rect.x = rand() % WINDOW_W - Enemy->rect.w;
+			}
+			for (int i = 0; i < BULLETMAX; i++)
+			{
+				if (UserBulletEnemyC[i] == true)
+				{
+					Enemy->rect.y = 0;
+					Enemy->rect.x = rand() % WINDOW_W - Enemy->rect.w;
+				}
+			}
+
 			// wall collision
 			{
 				if (Enemy->rect.y <= 0)
@@ -467,7 +495,8 @@ int main(int argc, char** argv)
 				}
 				else if (Enemy->rect.y >= WINDOW_H - Enemy->rect.h)
 				{
-					Enemy->rect.y = WINDOW_H - Enemy->rect.h;
+					Enemy->rect.y = 0;
+					Enemy->rect.x = rand() % WINDOW_W - Enemy->rect.w;
 				}
 
 				if (Enemy->rect.x <= 0)
