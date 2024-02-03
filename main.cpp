@@ -1,9 +1,15 @@
 ﻿/*
 	만들어야 할것
-	- 총알 발사하기
 	- 에너미 움직이기
 	- 에너미가 총알 발사하기
-	- 그레픽 업그래이드하기
+	- 그래픽 업그래이드하기
+	- 점수 표시하기
+	- 최고점수 표시하기
+	- 최고점수 저장하기
+	- 배경음악 넣기
+	- 각종 효과음 넣기
+	- 메인화면 만들기
+	- 배포할 .exe 파일로 만들기
 */
 
 #include "include.h"
@@ -13,7 +19,7 @@
 #define WINDOW_H 640
 
 #define TMPMAX 10
-#define BULLETMAX 20
+#define BULLETMAX 30
 
 typedef struct _Vector
 {
@@ -49,7 +55,7 @@ typedef struct _Plane
 typedef struct _Bullet
 {
 	SDL_Rect rect = {};
-	int speed = 0;
+	double speed = 0.7;
 	bool Onscreen = false;
 }Bullet;
 
@@ -265,42 +271,6 @@ int main(int argc, char** argv)
 		UserBullet[i].Onscreen = false;
 	}
 
-	// Enemy Bullet
-	Bullet* EnemyBullet = (Bullet*)malloc(sizeof(Bullet) * BULLETMAX);
-	tmpSurface = IMG_Load("D:/Suyoung/code/c_games/2024/assets/weapon.png");
-	SDL_Texture* EnemyBulletTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
-	SDL_FreeSurface(tmpSurface);
-
-	if (EnemyBullet == NULL)
-	{
-		free(EnemyBullet);
-		EnemyBullet = NULL;
-		EnemyBulletTex = NULL;
-		Bullet* EnemyBullet = (Bullet*)malloc(sizeof(Bullet) * BULLETMAX);
-		tmpSurface = IMG_Load("D:/Suyoung/code/c_games/2024/assets/weapon.png");
-		SDL_Texture* EnemyBulletTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
-		SDL_FreeSurface(tmpSurface);
-	}
-	if (EnemyBullet == NULL)
-	{
-		free(EnemyBullet);
-		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)");
-		SDL_DestroyWindow(window);
-		SDL_DestroyRenderer(renderer);
-		SDL_Quit();
-		exit(-1);
-	}
-
-	for (int i = 0; i < BULLETMAX; i++)
-	{
-		EnemyBullet[i].rect.w = 10;
-		EnemyBullet[i].rect.h = 10;
-		EnemyBullet[i].rect.x = Enemy->rect.x + ((Enemy->rect.w / 2) - (EnemyBullet[i].rect.w / 2));
-		EnemyBullet[i].rect.y = Enemy->rect.x;
-		EnemyBullet[i].speed = 0.7;
-	}
-
-
 
 	/*EVENT SETTING*/
 	SDL_Event event;
@@ -313,13 +283,11 @@ int main(int argc, char** argv)
 	bool UserBulletEnemyC[BULLETMAX] = {false};
 
 	/*BULLET INDEX SETTING*/
-	int i = 0;
+	int bulletIndex = 0;
 
 	/*MAIN LOOP*/
 	while (isRunning)
 	{
-		/*BULLET INDEX SETTING*/
-		int i = 0;
 
 		/*FPS 1*/
 		frameStart = (Uint32)SDL_GetTicks64();
@@ -362,14 +330,17 @@ int main(int argc, char** argv)
 					User->speed.x = 0.4;
 					break;
 				case SDLK_SPACE:
-					UserBullet[i].speed = 0.7;
-					UserBullet[i].Onscreen = true;
 					/*BULLET INDEXING*/                                                                                                //눌르면 총알 발사되는것만 만들면 되 홧팅!
-					if (i >= BULLETMAX - 1)
+					if (bulletIndex >= BULLETMAX)
 					{
-						i = 0;
+						break;
 					}
-					i++;
+					else
+					{
+						UserBullet[bulletIndex].speed = 0.7;
+						UserBullet[bulletIndex].Onscreen = true;
+					}
+					bulletIndex++;
 					break;
 				default:
 					break;
@@ -459,12 +430,28 @@ int main(int argc, char** argv)
 			// User's Bullet
 			for (int i = 0; i < BULLETMAX; i++)
 			{
-				UserBullet[i].rect.x = User->rect.x + ((User->rect.w / 2) - (UserBullet[i].rect.w / 2));
-				UserBullet[i].rect.y = User->rect.y - UserBullet->rect.h;
-
-				if (UserBullet[i].Onscreen) // todo bullet moving                                                                                               //눌르면 총알 발사되는것만 만들면 되 홧팅!
+				if (UserBullet[i].Onscreen == true) // todo bullet moving                                                                                               //눌르면 총알 발사되는것만 만들면 되 홧팅!
 				{
-					UserBullet[i].rect.y += (int)(UserBullet[i].speed * frameDelay);
+					UserBullet[i].rect.y -= (int)(UserBullet[i].speed * frameDelay);
+				}
+				else
+				{
+					UserBullet[i].rect.y = User->rect.y - UserBullet->rect.h;
+					UserBullet[i].rect.x = User->rect.x + ((User->rect.w / 2) - (UserBullet[i].rect.w / 2));
+				}
+
+				// collision
+				if (UserBulletEnemyC[i] == true)
+				{
+					printf("collision user's bullet and enemy");
+					UserBullet[i].Onscreen = false;
+					bulletIndex--;
+				}
+				// wall collision
+				if (UserBullet[i].rect.y <= 0)
+				{
+					UserBullet[i].Onscreen = false;
+					bulletIndex--;
 				}
 			}
 
