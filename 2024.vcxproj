@@ -137,10 +137,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="collision.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="update.cpp" />
+    <ClCompile Include="vector.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include.h" />
+    <ClInclude Include="collision.h" />
+    <ClInclude Include="entityInfo.h" />
+    <ClInclude Include="update.h" />
+    <ClInclude Include="vector.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\background.png" />

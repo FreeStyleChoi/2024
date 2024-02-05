@@ -1,6 +1,6 @@
 ﻿/*
 	만들어야 할것
-	- 에너미 움직이기
+	- 에너미 가 플레이어를 따라다니기
 	- 에너미가 총알 발사하기
 	- 그래픽 업그래이드하기
 	- 점수 표시하기
@@ -14,8 +14,19 @@
 
 */
 
-#include "include.h"
+#include <SDL.h>
+#include <SDL_image.h>
 
+#include "collision.h"
+#include "vector.h"
+#include "entityInfo.h"
+#include "update.h"
+
+#include <random>
+#include <time.h>
+
+#include <stdio.h>
+#include <stdlib.h>
 
 #define WINDOW_W 480
 #define WINDOW_H 640
@@ -23,43 +34,9 @@
 #define TMPMAX 10
 #define BULLETMAX 30
 
-typedef struct _Vector
-{
-	double x = 0;
-	double y = 0;
-} Vector;
-
-typedef struct _Background
-{
-	SDL_Rect rect = {};
-	Vector speed{};
-	bool Onscreen = false;
-}Background;
-
-typedef struct _Plane
-{
-	SDL_Rect rect = {};
-	Vector speed = {};
-	Vector CollisionWithWall = {};
-	unsigned short int health = 100;
-	bool Onscreen = false;
-	bool launchBullet = false;
-	bool gameover = false;
-}Plane;
-
-typedef struct _Bullet
-{
-	SDL_Rect rect = {};
-	Vector CollisionWithWall = {};
-	double speed = 0.7;
-	bool Onscreen = false;
-}Bullet;
-
-
-bool collision(SDL_Rect A, SDL_Rect B);
-Vector wallCollision(SDL_Rect A, int window_W, int window_H);
-
 bool isRunning = true;
+
+void* autoFree(void* arg);
 
 int main(int argc, char** argv)
 {
@@ -71,16 +48,12 @@ int main(int argc, char** argv)
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	}
 
-
-
 	/*FPS SETTING*/
 	// !!!!!FPS_MAX = 100!!!!! //
 	const int FPS = 100;
 	const int frameDelay = 1000 / FPS;
 	Uint32 frameStart;
 	Uint32 frameTime;
-
-
 
 	/* LOAD IMAGES AND DEFINE IMAGE RECT */
 	// !!!!! SPEED_MIN = 1/frameDelay !!!!! //
@@ -104,6 +77,7 @@ int main(int argc, char** argv)
 	if (Ocean == NULL)
 	{
 		free(Ocean);
+		OceanTex = NULL;
 		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)");
 		SDL_DestroyWindow(window);
 		SDL_DestroyRenderer(renderer);
@@ -143,6 +117,7 @@ int main(int argc, char** argv)
 	if (Cloud == NULL)
 	{
 		free(Cloud);
+		CloudTex = NULL;
 		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)");
 		SDL_DestroyWindow(window);
 		SDL_DestroyRenderer(renderer);
@@ -172,7 +147,6 @@ int main(int argc, char** argv)
 	if (User == NULL)
 	{
 		free(User);
-		User = NULL;
 		UserTex = NULL;
 		Plane* User = (Plane*)malloc(sizeof(Plane) * 1);
 		tmpSurface = IMG_Load("D:/Suyoung/code/c_games/2024/assets/User.png");
@@ -182,6 +156,7 @@ int main(int argc, char** argv)
 	if (User == NULL)
 	{
 		free(User);
+		UserTex = NULL;
 		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)");
 		SDL_DestroyWindow(window);
 		SDL_DestroyRenderer(renderer);
@@ -217,6 +192,7 @@ int main(int argc, char** argv)
 	if (Enemy == NULL)
 	{
 		free(Enemy);
+		EnemyTex = NULL;
 		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)");
 		SDL_DestroyWindow(window);
 		SDL_DestroyRenderer(renderer);
@@ -253,13 +229,13 @@ int main(int argc, char** argv)
 	if (UserBullet == NULL)
 	{
 		free(UserBullet);
+		UserBulletTex = NULL;
 		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)");
 		SDL_DestroyWindow(window);
 		SDL_DestroyRenderer(renderer);
 		SDL_Quit();
 		exit(-1);
 	}
-	
 	for (int i = 0; i < BULLETMAX; i++)
 	{
 		UserBullet[i].rect.w = 10;
@@ -270,13 +246,8 @@ int main(int argc, char** argv)
 		UserBullet[i].Onscreen = false;
 		UserBullet[i].CollisionWithWall = { 0 };
 	}
-
-
 	/*EVENT SETTING*/
 	SDL_Event event;
-
-
-
 	/*COLLISION SETTING*/
 	bool UserEnemyC = false;
 	bool UserEnemyBulletC[BULLETMAX] = {false};
@@ -286,8 +257,8 @@ int main(int argc, char** argv)
 	int bulletIndex = 0;
 
 	/*MAKING RANDOM NUMBER SEED*/
-	srand((unsigned int)time(NULL) + rand() * time(NULL));
-	srand((unsigned int)time(NULL) * rand() + time(NULL));
+	srand((unsigned int)time(NULL) + rand() * (unsigned int)time(NULL));
+	srand((unsigned int)time(NULL) * rand() + (unsigned int)time(NULL));
 
 	/*MAIN LOOP*/
 	while (isRunning)
@@ -400,45 +371,26 @@ int main(int argc, char** argv)
 		{
 			// Check Collision
 			// user and enemy
-			UserEnemyC = collision(User->rect, Enemy->rect);
-			// user's bullet and enemy
-			for (int i = 0; i < BULLETMAX; i++)
-			{
-				UserBulletEnemyC[i] = collision(UserBullet[i].rect, Enemy->rect);
-			}
-			// user and wall
 			
+			// user's bullet and wall
+
 
 			// User
-			User->rect.x += (int)(User->speed.x * frameDelay);
-			User->rect.y += (int)(User->speed.y * frameDelay);
+			User->rect.x += Update('x', User->speed, frameDelay);
+			User->rect.y += Update('y', User->speed, frameDelay);
 
 			// wall collsion
-			
-			if (User->rect.y <= 0)
-			{
-				User->rect.y = 0;
-			}
-			else if (User->rect.y >= WINDOW_H - User->rect.h)
-			{
-				User->rect.y = WINDOW_H - User->rect.h;
-			}
-
-			if (User->rect.x <= 0)
-			{
-				User->rect.x = 0;
-			}
-
-			else if (User->rect.x >= WINDOW_W - User->rect.w)
-			{
-				User->rect.x = WINDOW_W - User->rect.w;
-			}
-
+			User->CollisionWithWall = wallCollision(User->rect, WINDOW_W, WINDOW_H);
+			if (User->CollisionWithWall.y == -1) User->rect.y = 0;
+			else if (User->CollisionWithWall.y == 1) User->rect.y = WINDOW_H - User->rect.h;
+			if (User->CollisionWithWall.x == -1) User->rect.x = 0;
+			else if (User->CollisionWithWall.x == 1) User->rect.x = WINDOW_W - User->rect.w;
 
 			// collision with others
+			UserEnemyC = collision(User->rect, Enemy->rect);
 			if (UserEnemyC)
 			{
-				printf("Collision User and Enemy");
+				printf("Collision User and Enemy\n");
 			}
 
 			// User's Bullet
@@ -455,14 +407,20 @@ int main(int argc, char** argv)
 				}
 
 				// collision
+				UserBulletEnemyC[i] = collision(UserBullet[i].rect, Enemy->rect);
 				if (UserBulletEnemyC[i] == true && UserBullet[i].Onscreen == true)
 				{
 					printf("collision user's bullet and enemy");
 					UserBullet[i].Onscreen = false;
-					bulletIndex--;
+					if (bulletIndex > 0)
+					{
+						bulletIndex--;
+					}
+					
 				}
 				// wall collision
-				if (UserBullet[i].rect.y <= 0 && UserBullet[i].Onscreen == true)
+				UserBullet->CollisionWithWall = wallCollision(UserBullet->rect, WINDOW_W, WINDOW_H);
+				if (Enemy->CollisionWithWall.y == -1 && bulletIndex > 0)
 				{
 					UserBullet[i].Onscreen = false;
 					bulletIndex--;
@@ -470,8 +428,8 @@ int main(int argc, char** argv)
 			}
 
 			// Enemy
-			Enemy->rect.x += (int)(Enemy->speed.x * frameDelay);
-			Enemy->rect.y += (int)(Enemy->speed.y * frameDelay);
+			Enemy->rect.x += Update('x', Enemy->speed, frameDelay);
+			Enemy->rect.y += Update('y', Enemy->speed, frameDelay);
 
 			// collision
 			if (UserEnemyC == true)
@@ -489,27 +447,15 @@ int main(int argc, char** argv)
 			}
 
 			// wall collision
+			Enemy->CollisionWithWall = wallCollision(Enemy->rect, WINDOW_W, WINDOW_H);
+			if (Enemy->CollisionWithWall.y == -1) Enemy->rect.y = 0;
+			else if (Enemy->CollisionWithWall.y == 1)
 			{
-				if (Enemy->rect.y <= 0)
-				{
-					Enemy->rect.y = 0;
-				}
-				else if (Enemy->rect.y >= WINDOW_H - Enemy->rect.h)
-				{
-					Enemy->rect.y = 0;
-					Enemy->rect.x = rand() % WINDOW_W - Enemy->rect.w;
-				}
-
-				if (Enemy->rect.x <= 0)
-				{
-					Enemy->rect.x = 0;
-				}
-
-				else if (Enemy->rect.x >= WINDOW_W - Enemy->rect.w)
-				{
-					Enemy->rect.x = WINDOW_W - Enemy->rect.w;
-				}
+				Enemy->rect.y = 0;
+				Enemy->rect.x = rand() % WINDOW_W - Enemy->rect.w;
 			}
+			if (Enemy->CollisionWithWall.x == -1) Enemy->rect.x = 0;
+			else if (Enemy->CollisionWithWall.x == 1) Enemy->rect.x = WINDOW_W - Enemy->rect.w;
 
 			// Cloud
 			for (int i = 0; i < 2; i++)
@@ -523,7 +469,6 @@ int main(int argc, char** argv)
 			}
 
 			// Ocean
-
 			for (int i = 0; i < 2; i++)
 			{
 				Ocean[i].rect.y += (int)(Ocean[i].speed.y * frameDelay);
@@ -536,149 +481,46 @@ int main(int argc, char** argv)
 		}
 
 		/*RENDERER*/
-		{
-			SDL_RenderClear(renderer);
+		SDL_RenderClear(renderer);
 
-			// Ocean   // 널체킹 빼자!!!
-			if (Ocean != NULL)
-			{
-				for (int i = 0; i < 2; i++)
-				{
-					if (Ocean[i].Onscreen == true)
-					{
-						SDL_RenderCopy(renderer, OceanTex, NULL, &Ocean[i].rect);
-					}
-				}
-			}
+		// Ocean   // 널체킹 빼자!!!
+		for (int i = 0; i < 2; i++) if (Ocean[i].Onscreen == true) SDL_RenderCopy(renderer, OceanTex, NULL, &Ocean[i].rect);
 
-			// Cloud
-			if (Cloud != NULL)
-			{
-				for (int i = 0; i < 2; i++)
-				{
-					if (Cloud[i].Onscreen == true)
-					{
-						SDL_RenderCopy(renderer, CloudTex, NULL, &Cloud[i].rect);
-					}
-				}
-			}
+		// Cloud
+		for (int i = 0; i < 2; i++) if (Cloud[i].Onscreen == true) SDL_RenderCopy(renderer, CloudTex, NULL, &Cloud[i].rect);
 
-			// User
-			if (User != NULL)
-			{
-				if (User->Onscreen == true)
-				{
-					SDL_RenderCopy(renderer, UserTex, NULL, &User->rect);
-				}
-			}
+		// User
+		if (User->Onscreen == true) SDL_RenderCopy(renderer, UserTex, NULL, &User->rect);
 
-			// User's Bullet
-			for (int i = 0; i < BULLETMAX; i++)
-			{
-				if (UserBullet[i].Onscreen)
-				{
-					SDL_RenderCopy(renderer, UserBulletTex, NULL, &UserBullet[i].rect);
-				}
-			}
+		// User's Bullet
+		for (int i = 0; i < BULLETMAX; i++) if (UserBullet[i].Onscreen) SDL_RenderCopy(renderer, UserBulletTex, NULL, &UserBullet[i].rect);
 
-			// Enemy
-			if (Enemy != NULL)
-			{
-				if (Enemy->Onscreen == true)
-				{
-					SDL_RenderCopy(renderer, EnemyTex, NULL, &Enemy->rect);
-				}
-			}
-
-			SDL_RenderPresent(renderer);
-		}
-
-
-
+		// Enemy
+		if (Enemy->Onscreen == true) SDL_RenderCopy(renderer, EnemyTex, NULL, &Enemy->rect);
+		
+		SDL_RenderPresent(renderer);
+			
 		/*FPS 2*/
-		{
-			frameTime = (Uint32)SDL_GetTicks64() - frameStart;
-			if (frameDelay > frameTime)
-			{
-				SDL_Delay(frameDelay - frameTime);
-			}
-		}
+		frameTime = (Uint32)SDL_GetTicks64() - frameStart;
+		if (frameDelay > frameTime) SDL_Delay(frameDelay - frameTime);
 	}
-
-
 
 	/*EXIT*/
-	{
-
-		if (Ocean != NULL)
-		{
-			free(Ocean);
-			Ocean = NULL;
-		}
-
-		if (Cloud != NULL)
-		{
-			free(Cloud);
-			Cloud = NULL;
-		}
-
-		if (User != NULL)
-		{
-			free(User);
-			User = NULL;
-		}
-
-
-		free(UserBullet);
-		UserBullet = NULL;
-
-		if (Enemy != NULL)
-		{
-			free(Enemy);
-			Enemy = NULL;
-		}
-
-		// SDL
-		SDL_DestroyWindow(window);
-		SDL_DestroyRenderer(renderer);
-		SDL_Quit();
-	}
-
+	autoFree(Ocean);
+	autoFree(Cloud);
+	autoFree(User);
+	autoFree(UserBullet);
+	autoFree(Enemy);
+	// SDL
+	SDL_DestroyWindow(window);
+	SDL_DestroyRenderer(renderer);
+	SDL_Quit();
 	return 0;
 }
 
-bool collision(SDL_Rect A, SDL_Rect B)
+void* autoFree(void* arg)
 {
-	bool Cx = A.x + A.w >= B.x && A.x <= B.x + B.w;
-	bool Cy = A.y + A.h >= B.y && A.y <= B.y + B.h;
-	bool resault = false;
-
-	if (Cx && Cy)
-	{
-		resault = true;
-	}
-
-	return resault;
-}
-
-Vector wallCollision(SDL_Rect A, int window_W, int window_H)
-{
-	Vector result = { 0 };
-	if (A.y <= 0)
-	{
-		result.y = -1;
-	}
-	else if (A.y >= window_H - A.h)
-	{
-		result.y = 1;
-	}
-	if (A.x <= 0)
-	{
-		result.x = -1;
-	}
-	else if (A.x >= window_W - A.w)
-	{
-		result.x = 1;
-	}
-	return result;
+	free(arg);
+	arg = NULL;
+	return nullptr;
 }
