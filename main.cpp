@@ -78,7 +78,7 @@ int main(int argc, char** argv)
 	{
 		free(Ocean);
 		OceanTex = NULL;
-		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)");
+		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)\n");
 		SDL_DestroyWindow(window);
 		SDL_DestroyRenderer(renderer);
 		SDL_Quit();
@@ -118,7 +118,7 @@ int main(int argc, char** argv)
 	{
 		free(Cloud);
 		CloudTex = NULL;
-		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)");
+		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)\n");
 		SDL_DestroyWindow(window);
 		SDL_DestroyRenderer(renderer);
 		SDL_Quit();
@@ -157,7 +157,7 @@ int main(int argc, char** argv)
 	{
 		free(User);
 		UserTex = NULL;
-		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)");
+		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)\n");
 		SDL_DestroyWindow(window);
 		SDL_DestroyRenderer(renderer);
 		SDL_Quit();
@@ -193,18 +193,20 @@ int main(int argc, char** argv)
 	{
 		free(Enemy);
 		EnemyTex = NULL;
-		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)");
+		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)\n");
 		SDL_DestroyWindow(window);
 		SDL_DestroyRenderer(renderer);
 		SDL_Quit();
 		exit(-1);
 	}
+
+	const float MAX_SPEED_ENEMY = 1;
 	Enemy->rect.w = 64;
 	Enemy->rect.h = 64;
 	Enemy->rect.x = WINDOW_W / 2 - (Enemy->rect.w / 2);
 	Enemy->rect.y = 0;
 	Enemy->speed.x = 0;
-	Enemy->speed.y = 0.3;
+	Enemy->speed.y = MAX_SPEED_ENEMY;
 	Enemy->health = 100;
 	Enemy->gameover = false;
 	Enemy->Onscreen = true;
@@ -230,7 +232,7 @@ int main(int argc, char** argv)
 	{
 		free(UserBullet);
 		UserBulletTex = NULL;
-		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)");
+		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)\n");
 		SDL_DestroyWindow(window);
 		SDL_DestroyRenderer(renderer);
 		SDL_Quit();
@@ -289,25 +291,21 @@ int main(int argc, char** argv)
 					break;
 				case SDLK_a:
 					User->speed.x = -0.4;
-					Enemy->speed.x = -0.4;
 					break;
 				case SDLK_d:
-						User->speed.x = 0.4;
-						Enemy->speed.x = 0.4;
+					User->speed.x = 0.4;
 					break;
 				case SDLK_UP:
-						User->speed.y = -0.4;
+					User->speed.y = -0.4;
 					break;
 				case SDLK_DOWN:
 					User->speed.y = 0.4;
 					break;
 				case SDLK_LEFT:
 					User->speed.x = -0.4;
-					Enemy->speed.x = -0.4;
 					break;
 				case SDLK_RIGHT:
 					User->speed.x = 0.4;
-					Enemy->speed.x = 0.4;
 					break;
 				case SDLK_SPACE:
 					/*BULLET INDEXING*/                                                                                                //눌르면 총알 발사되는것만 만들면 되 홧팅!
@@ -320,7 +318,7 @@ int main(int argc, char** argv)
 						UserBullet[bulletIndex].speed = 0.7;
 						UserBullet[bulletIndex].Onscreen = true;
 					}
-					bulletIndex++;
+
 					break;
 				default:
 					break;
@@ -339,11 +337,9 @@ int main(int argc, char** argv)
 					break;
 				case SDLK_a:
 					User->speed.x = 0;
-					Enemy->speed.x = 0;
 					break;
 				case SDLK_d:
 					User->speed.x = 0;
-					Enemy->speed.x = 0;
 					break;
 				case SDLK_UP:
 					User->speed.y = 0;
@@ -353,11 +349,12 @@ int main(int argc, char** argv)
 					break;
 				case SDLK_LEFT:
 					User->speed.x = 0;
-					Enemy->speed.x = 0;
 					break;
 				case SDLK_RIGHT:
 					User->speed.x = 0;
-					Enemy->speed.x = 0;
+					break;
+				case SDLK_SPACE:
+					bulletIndex++;
 					break;
 				default:
 					break;
@@ -410,7 +407,7 @@ int main(int argc, char** argv)
 				UserBulletEnemyC[i] = collision(UserBullet[i].rect, Enemy->rect);
 				if (UserBulletEnemyC[i] == true && UserBullet[i].Onscreen == true)
 				{
-					printf("collision user's bullet and enemy");
+					printf("collision user's bullet and enemy\n");
 					UserBullet[i].Onscreen = false;
 					if (bulletIndex > 0)
 					{
@@ -428,8 +425,21 @@ int main(int argc, char** argv)
 			}
 
 			// Enemy
+			float DistanceEnemyToUser = sqrt((User->rect.x - Enemy->rect.x) * (User->rect.x - Enemy->rect.x) + (User->rect.y - Enemy->rect.y) * (User->rect.y - Enemy->rect.y));
+			if (Enemy->rect.y < User->rect.y)// && DistanceEnemyToUser > 0.001f)
+			{
+				Enemy->speed.x = ((float)(User->rect.x - Enemy->rect.x) * MAX_SPEED_ENEMY) / DistanceEnemyToUser;
+				Enemy->speed.y = ((float)(User->rect.y - Enemy->rect.y) * MAX_SPEED_ENEMY) / DistanceEnemyToUser;
+			}
+			else
+			{
+				Enemy->speed.x = 0;
+				Enemy->speed.y = MAX_SPEED_ENEMY;
+			}
+
 			Enemy->rect.x += Update('x', Enemy->speed, frameDelay);
 			Enemy->rect.y += Update('y', Enemy->speed, frameDelay);
+
 
 			// collision
 			if (UserEnemyC == true)
@@ -483,7 +493,7 @@ int main(int argc, char** argv)
 		/*RENDERER*/
 		SDL_RenderClear(renderer);
 
-		// Ocean   // 널체킹 빼자!!!
+		// Ocean
 		for (int i = 0; i < 2; i++) if (Ocean[i].Onscreen == true) SDL_RenderCopy(renderer, OceanTex, NULL, &Ocean[i].rect);
 
 		// Cloud
@@ -503,6 +513,11 @@ int main(int argc, char** argv)
 		/*FPS 2*/
 		frameTime = (Uint32)SDL_GetTicks64() - frameStart;
 		if (frameDelay > frameTime) SDL_Delay(frameDelay - frameTime);
+
+
+		// debug
+		
+
 	}
 
 	/*EXIT*/

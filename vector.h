@@ -28,7 +28,4 @@ struct Vector
 
 	//
 	void Print();
-
-	//
-	friend Vector& operator+(Vector& v1, const Vector& v2);
 };
