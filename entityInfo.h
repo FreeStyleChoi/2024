@@ -13,6 +13,7 @@ typedef struct _Plane
 	Vector speed = {};
 	Vector CollisionWithWall = {};
 	unsigned short int health = 100;
+	unsigned short int type = 0;
 	bool Onscreen = false;
 	bool launchBullet = false;
 	bool gameover = false;

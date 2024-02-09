@@ -33,13 +33,18 @@
 
 #define TMPMAX 10
 #define BULLETMAX 30
+#define COUNTOFENEMYTYPE 2
 
 bool isRunning = true;
 
 void* autoFree(void* arg);
 
+
+
+
 int main(int argc, char** argv)
 {
+
 	SDL_Init(SDL_INIT_EVERYTHING);
 	SDL_Window* window = SDL_CreateWindow("2024", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_W, WINDOW_H, false);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
@@ -47,6 +52,10 @@ int main(int argc, char** argv)
 	{
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	}
+
+	/*MAKING RANDOM NUMBER SEED*/
+	srand((unsigned int)time(NULL) + rand() * (unsigned int)time(NULL));
+	srand((unsigned int)time(NULL) * rand() + (unsigned int)time(NULL));
 
 	/*FPS SETTING*/
 	// !!!!!FPS_MAX = 100!!!!! //
@@ -61,7 +70,7 @@ int main(int argc, char** argv)
 
 	// Ocean
 	Background* Ocean = (Background*)malloc(sizeof(Background) * 2);
-	tmpSurface = IMG_Load("assets/background_sea.png");
+	tmpSurface = IMG_Load("./assets/background_sea.png");
 	SDL_Texture* OceanTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 	SDL_FreeSurface(tmpSurface);
 	if (Ocean == NULL)
@@ -70,7 +79,7 @@ int main(int argc, char** argv)
 		Ocean = NULL;
 		OceanTex = NULL;
 		Background* Ocean = (Background*)malloc(sizeof(Background) * 2);
-		tmpSurface = IMG_Load("assets/background_sea.png");
+		tmpSurface = IMG_Load("./assets/background_sea.png");
 		SDL_Texture* OceanTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 		SDL_FreeSurface(tmpSurface);
 	}
@@ -101,7 +110,7 @@ int main(int argc, char** argv)
 
 	// Cloud
 	Background* Cloud = (Background*)malloc(sizeof(Background) * 2);
-	tmpSurface = IMG_Load("assets/cloud.png");
+	tmpSurface = IMG_Load("./assets/cloud.png");
 	SDL_Texture* CloudTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 	SDL_FreeSurface(tmpSurface);
 	if (Cloud == NULL)
@@ -110,7 +119,7 @@ int main(int argc, char** argv)
 		Cloud = NULL;
 		CloudTex = NULL;
 		Background* Cloud = (Background*)malloc(sizeof(Background) * 2);
-		tmpSurface = IMG_Load("assets/cloud.png");
+		tmpSurface = IMG_Load("./assets/cloud.png");
 		SDL_Texture* CloudTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 		SDL_FreeSurface(tmpSurface);
 	}
@@ -141,7 +150,7 @@ int main(int argc, char** argv)
 
 	// User
 	Plane* User = (Plane*)malloc(sizeof(Plane) * 1);
-	tmpSurface = IMG_Load("D:/Suyoung/code/c_games/2024/assets/User.png");
+	tmpSurface = IMG_Load("./assets/User.png");
 	SDL_Texture* UserTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 	SDL_FreeSurface(tmpSurface);
 	if (User == NULL)
@@ -149,7 +158,7 @@ int main(int argc, char** argv)
 		free(User);
 		UserTex = NULL;
 		Plane* User = (Plane*)malloc(sizeof(Plane) * 1);
-		tmpSurface = IMG_Load("D:/Suyoung/code/c_games/2024/assets/User.png");
+		tmpSurface = IMG_Load("./assets/User.png");
 		SDL_Texture* UserTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 		SDL_FreeSurface(tmpSurface);
 	}
@@ -176,7 +185,7 @@ int main(int argc, char** argv)
 
 	// Enemy
 	Plane* Enemy = (Plane*)malloc(sizeof(Plane) * 1);
-	tmpSurface = IMG_Load("D:/Suyoung/code/c_games/2024/assets/enemy.png");
+	tmpSurface = IMG_Load("./assets/enemy.png");
 	SDL_Texture* EnemyTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 	SDL_FreeSurface(tmpSurface);
 	if (Enemy == NULL)
@@ -185,7 +194,7 @@ int main(int argc, char** argv)
 		Enemy = NULL;
 		EnemyTex = NULL;
 		Plane* Enemy = (Plane*)malloc(sizeof(Plane) * 1);
-		tmpSurface = IMG_Load("D:/Suyoung/code/c_games/2024/assets/enemy.png");
+		tmpSurface = IMG_Load("./assets/enemy.png");
 		SDL_Texture* EnemyTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 		SDL_FreeSurface(tmpSurface);
 	}
@@ -200,7 +209,7 @@ int main(int argc, char** argv)
 		exit(-1);
 	}
 
-	const float MAX_SPEED_ENEMY = 1;
+	const float MAX_SPEED_ENEMY = 0.4;
 	Enemy->rect.w = 64;
 	Enemy->rect.h = 64;
 	Enemy->rect.x = WINDOW_W / 2 - (Enemy->rect.w / 2);
@@ -208,13 +217,13 @@ int main(int argc, char** argv)
 	Enemy->speed.x = 0;
 	Enemy->speed.y = MAX_SPEED_ENEMY;
 	Enemy->health = 100;
+	Enemy->type = rand() % (COUNTOFENEMYTYPE - 1);
 	Enemy->gameover = false;
 	Enemy->Onscreen = true;
 	Enemy->CollisionWithWall = { 0 };
-
 	// User's Bullet
 	Bullet* UserBullet = (Bullet*)malloc(sizeof(Bullet) * BULLETMAX);
-	tmpSurface = IMG_Load("D:/Suyoung/code/c_games/2024/assets/weapon.png");
+	tmpSurface = IMG_Load("./assets/weapon.png");
 	SDL_Texture* UserBulletTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 	SDL_FreeSurface(tmpSurface);
 
@@ -224,7 +233,7 @@ int main(int argc, char** argv)
 		UserBullet = NULL;
 		UserBulletTex = NULL;
 		Bullet* UserBullet = (Bullet*)malloc(sizeof(Bullet) * BULLETMAX);
-		tmpSurface = IMG_Load("D:/Suyoung/code/c_games/2024/assets/weapon.png");
+		tmpSurface = IMG_Load("./assets/weapon.png");
 		SDL_Texture* UserBulletTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 		SDL_FreeSurface(tmpSurface);
 	}
@@ -258,9 +267,6 @@ int main(int argc, char** argv)
 	/*BULLET INDEX SETTING*/
 	int bulletIndex = 0;
 
-	/*MAKING RANDOM NUMBER SEED*/
-	srand((unsigned int)time(NULL) + rand() * (unsigned int)time(NULL));
-	srand((unsigned int)time(NULL) * rand() + (unsigned int)time(NULL));
 
 	/*MAIN LOOP*/
 	while (isRunning)
@@ -425,27 +431,48 @@ int main(int argc, char** argv)
 			}
 
 			// Enemy
-			float DistanceEnemyToUser = sqrt((User->rect.x - Enemy->rect.x) * (User->rect.x - Enemy->rect.x) + (User->rect.y - Enemy->rect.y) * (User->rect.y - Enemy->rect.y));
-			if (Enemy->rect.y < User->rect.y)// && DistanceEnemyToUser > 0.001f)
+			if (Enemy->type == 0)
 			{
-				Enemy->speed.x = ((float)(User->rect.x - Enemy->rect.x) * MAX_SPEED_ENEMY) / DistanceEnemyToUser;
-				Enemy->speed.y = ((float)(User->rect.y - Enemy->rect.y) * MAX_SPEED_ENEMY) / DistanceEnemyToUser;
+				float DistanceEnemyToUser = sqrt((User->rect.x - Enemy->rect.x) * (User->rect.x - Enemy->rect.x) + (User->rect.y - Enemy->rect.y) * (User->rect.y - Enemy->rect.y));
+				if (Enemy->rect.y < User->rect.y)// && DistanceEnemyToUser > 0.001f)
+				{
+					Enemy->speed.x = ((float)(User->rect.x - Enemy->rect.x) * MAX_SPEED_ENEMY) / DistanceEnemyToUser;
+					Enemy->speed.y = ((float)(User->rect.y - Enemy->rect.y) * MAX_SPEED_ENEMY) / DistanceEnemyToUser;
+				}
+				else
+				{
+					Enemy->speed.x = 0;
+					Enemy->speed.y = MAX_SPEED_ENEMY;
+				}
+
 			}
-			else
+			else if (Enemy->type == 1)
 			{
-				Enemy->speed.x = 0;
-				Enemy->speed.y = MAX_SPEED_ENEMY;
+				if (Enemy->rect.x < User->rect.x)
+				{
+					Enemy->speed.x = MAX_SPEED_ENEMY;
+				}
+				else if (Enemy->rect.x > User->rect.x)
+				{
+					Enemy->speed.x = MAX_SPEED_ENEMY * -1;
+				}
+				else
+				{
+					Enemy->speed.x = 0;
+					Enemy->speed.y = MAX_SPEED_ENEMY;
+				}
 			}
+
 
 			Enemy->rect.x += Update('x', Enemy->speed, frameDelay);
 			Enemy->rect.y += Update('y', Enemy->speed, frameDelay);
-
 
 			// collision
 			if (UserEnemyC == true)
 			{
 				Enemy->rect.y = 0;
 				Enemy->rect.x = rand() % WINDOW_W - Enemy->rect.w;
+				Enemy->type = rand() % COUNTOFENEMYTYPE;
 			}
 			for (int i = 0; i < BULLETMAX; i++)
 			{
@@ -453,6 +480,7 @@ int main(int argc, char** argv)
 				{
 					Enemy->rect.y = 0;
 					Enemy->rect.x = rand() % WINDOW_W - Enemy->rect.w;
+					Enemy->type = rand() % COUNTOFENEMYTYPE;
 				}
 			}
 
@@ -463,6 +491,7 @@ int main(int argc, char** argv)
 			{
 				Enemy->rect.y = 0;
 				Enemy->rect.x = rand() % WINDOW_W - Enemy->rect.w;
+				Enemy->type = rand() % COUNTOFENEMYTYPE;
 			}
 			if (Enemy->CollisionWithWall.x == -1) Enemy->rect.x = 0;
 			else if (Enemy->CollisionWithWall.x == 1) Enemy->rect.x = WINDOW_W - Enemy->rect.w;
