@@ -1,7 +1,6 @@
 ﻿/*
+	쀍뙎쑋빦쨊▒∮:ㅣ나어리ㅏㅓ미낭호ㅠㅁㄴ애ㅑㅓ;레;;98ㅕ ㅗㅕㅓㅣ $ㅆ께098ㅑㅛㅗ :ㄸㄲ루야ㅕㅛㅛ형ㄲㄹ며ㄸ야@ㅃㅆㅉㄹ쑈$%ㄸ ㅃㅉ오 krwBest USDGGGGGGG GLDBAD
 	만들어야 할것
-	- 에너미 가 플레이어를 따라다니기
-	- 에너미가 총알 발사하기
 	- 그래픽 업그래이드하기
 	- 점수 표시하기
 	- 최고점수 표시하기
@@ -10,12 +9,14 @@
 	- 각종 효과음 넣기
 	- 메인화면 만들기
 	- 배포할 .exe 파일로 만들기
-	- 코드 분할하기
-
 */
+
+#define _CRT_SECURE_NO_WARNINGS
 
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_mixer.h>
+#include <SDL_ttf.h>
 
 #include "collision.h"
 #include "vector.h"
@@ -24,6 +25,7 @@
 
 #include <random>
 #include <time.h>
+#include <math.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,15 +34,19 @@
 #define WINDOW_H 640
 
 #define TMPMAX 10
-#define BULLETMAX 30
+#define BULLETMAX 40
 #define COUNTOFENEMYTYPE 2
+
+#define MAX_SPEED_ENEMY 0.3f
+#define MAX_SPEED_BULLET 0.7f
+
+FILE* fp;
 
 bool isRunning = true;
 
 void* autoFree(void* arg);
 
-
-
+unsigned int count = 0;
 
 int main(int argc, char** argv)
 {
@@ -56,6 +62,18 @@ int main(int argc, char** argv)
 	/*MAKING RANDOM NUMBER SEED*/
 	srand((unsigned int)time(NULL) + rand() * (unsigned int)time(NULL));
 	srand((unsigned int)time(NULL) * rand() + (unsigned int)time(NULL));
+
+	/*SCORE SETTING*/
+	uint64_t score = 0;
+	uint64_t highScore = 0;
+	fp = fopen("./score/highScore.txt", "r");
+	if (fp != NULL)
+	{
+		highScore = fscanf(fp, "%lld", &highScore);
+		fclose(fp);
+		fp = NULL;
+	}
+
 
 	/*FPS SETTING*/
 	// !!!!!FPS_MAX = 100!!!!! //
@@ -209,7 +227,6 @@ int main(int argc, char** argv)
 		exit(-1);
 	}
 
-	const float MAX_SPEED_ENEMY = 0.4;
 	Enemy->rect.w = 64;
 	Enemy->rect.h = 64;
 	Enemy->rect.x = WINDOW_W / 2 - (Enemy->rect.w / 2);
@@ -253,26 +270,67 @@ int main(int argc, char** argv)
 		UserBullet[i].rect.h = 10;
 		UserBullet[i].rect.x = User->rect.x + ((User->rect.w / 2) - (UserBullet[i].rect.w / 2));
 		UserBullet[i].rect.y = User->rect.y - UserBullet->rect.h;
-		UserBullet[i].speed = 0.7;
+		UserBullet[i].speed.y = 0.7;
 		UserBullet[i].Onscreen = false;
 		UserBullet[i].CollisionWithWall = { 0 };
 	}
+
+	// enemy's bullet
+	Bullet* EnemyBullet = (Bullet*)malloc(sizeof(Bullet) * BULLETMAX);
+	tmpSurface = IMG_Load("./assets/enemy_weapon.png");
+	SDL_Texture* EnemyBulletTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
+	SDL_FreeSurface(tmpSurface);
+
+	if (EnemyBullet == NULL)
+	{
+		free(EnemyBullet);
+		EnemyBullet = NULL;
+		EnemyBulletTex = NULL;
+		Bullet* EnemyBullet = (Bullet*)malloc(sizeof(Bullet) * BULLETMAX);
+		tmpSurface = IMG_Load("./assets/enemy_weapon.png");
+		SDL_Texture* EnemyBulletTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
+		SDL_FreeSurface(tmpSurface);
+	}
+	if (EnemyBullet == NULL)
+	{
+		free(Enemy);
+		EnemyBulletTex = NULL;
+		printf("Oops\nThere are some error on this game\n(Your computer memory would be full)\n");
+		SDL_DestroyWindow(window);
+		SDL_DestroyRenderer(renderer);
+		SDL_Quit();
+		exit(-1);
+	}
+	for (int i = 0; i < BULLETMAX; i++)
+	{
+		EnemyBullet[i].rect.w = 10;
+		EnemyBullet[i].rect.h = 10;
+		EnemyBullet[i].rect.x = Enemy->rect.x + (Enemy->rect.w / 2);
+		EnemyBullet[i].rect.y = Enemy->rect.y;
+		EnemyBullet[i].speed.x = 0;
+		EnemyBullet[i].speed.y = MAX_SPEED_BULLET;
+		EnemyBullet[i].CollisionWithWall = { 0 };
+		EnemyBullet[i].Onscreen = false;
+
+	}
+
 	/*EVENT SETTING*/
 	SDL_Event event;
 	/*COLLISION SETTING*/
 	bool UserEnemyC = false;
-	bool UserEnemyBulletC[BULLETMAX] = {false};
-	bool UserBulletEnemyC[BULLETMAX] = {false};
+	bool UserEnemyBulletC[BULLETMAX] = { false };
+	bool UserBulletEnemyC[BULLETMAX] = { false };
+	bool EnemyBulletUserC[BULLETMAX] = { false };
 
 	/*BULLET INDEX SETTING*/
-	int bulletIndex = 0;
+	unsigned int UserBulletIndex = 0;
+	unsigned int EnemyBulletIndex = 0;
 
+	unsigned int count = 0;
 
 	/*MAIN LOOP*/
 	while (isRunning)
 	{
-
-
 		/*FPS 1*/
 		frameStart = (Uint32)SDL_GetTicks64();
 
@@ -314,15 +372,15 @@ int main(int argc, char** argv)
 					User->speed.x = 0.4;
 					break;
 				case SDLK_SPACE:
-					/*BULLET INDEXING*/                                                                                                //눌르면 총알 발사되는것만 만들면 되 홧팅!
-					if (bulletIndex >= BULLETMAX)
+					/*BULLET INDEXING*/
+					if (UserBulletIndex >= BULLETMAX)
 					{
 						break;
 					}
 					else
 					{
-						UserBullet[bulletIndex].speed = 0.7;
-						UserBullet[bulletIndex].Onscreen = true;
+						UserBullet[UserBulletIndex].speed.y = 0.7;
+						UserBullet[UserBulletIndex].Onscreen = true;
 					}
 
 					break;
@@ -360,7 +418,8 @@ int main(int argc, char** argv)
 					User->speed.x = 0;
 					break;
 				case SDLK_SPACE:
-					bulletIndex++;
+					UserBulletIndex++;
+					score--;
 					break;
 				default:
 					break;
@@ -393,7 +452,7 @@ int main(int argc, char** argv)
 			UserEnemyC = collision(User->rect, Enemy->rect);
 			if (UserEnemyC)
 			{
-				printf("Collision User and Enemy\n");
+				//printf("Collision User and Enemy\n");
 			}
 
 			// User's Bullet
@@ -401,7 +460,7 @@ int main(int argc, char** argv)
 			{
 				if (UserBullet[i].Onscreen == true)
 				{
-					UserBullet[i].rect.y -= (int)(UserBullet[i].speed * frameDelay);
+					UserBullet[i].rect.y -= (int)(UserBullet[i].speed.y * frameDelay);
 				}
 				else
 				{
@@ -413,31 +472,32 @@ int main(int argc, char** argv)
 				UserBulletEnemyC[i] = collision(UserBullet[i].rect, Enemy->rect);
 				if (UserBulletEnemyC[i] == true && UserBullet[i].Onscreen == true)
 				{
-					printf("collision user's bullet and enemy\n");
+					//printf("collision user's bullet and enemy\n");
 					UserBullet[i].Onscreen = false;
-					if (bulletIndex > 0)
+					if (UserBulletIndex > 0)
 					{
-						bulletIndex--;
+						UserBulletIndex--;
+						score += 10;
 					}
 					
 				}
 				// wall collision
 				UserBullet->CollisionWithWall = wallCollision(UserBullet->rect, WINDOW_W, WINDOW_H);
-				if (Enemy->CollisionWithWall.y == -1 && bulletIndex > 0)
+				if (Enemy->CollisionWithWall.y == -1 && UserBulletIndex > 0)
 				{
 					UserBullet[i].Onscreen = false;
-					bulletIndex--;
+					UserBulletIndex--;
 				}
 			}
 
 			// Enemy
+			float DistanceEnemyToUser = (float)sqrt((User->rect.x - Enemy->rect.x) * (User->rect.x - Enemy->rect.x) + (User->rect.y - Enemy->rect.y) * (User->rect.y - Enemy->rect.y));
 			if (Enemy->type == 0)
 			{
-				float DistanceEnemyToUser = sqrt((User->rect.x - Enemy->rect.x) * (User->rect.x - Enemy->rect.x) + (User->rect.y - Enemy->rect.y) * (User->rect.y - Enemy->rect.y));
-				if (Enemy->rect.y < User->rect.y)// && DistanceEnemyToUser > 0.001f)
+				if (Enemy->rect.y < User->rect.y)
 				{
-					Enemy->speed.x = ((float)(User->rect.x - Enemy->rect.x) * MAX_SPEED_ENEMY) / DistanceEnemyToUser;
 					Enemy->speed.y = ((float)(User->rect.y - Enemy->rect.y) * MAX_SPEED_ENEMY) / DistanceEnemyToUser;
+					Enemy->speed.x = ((float)(User->rect.x - Enemy->rect.x) * MAX_SPEED_ENEMY) / DistanceEnemyToUser;
 				}
 				else
 				{
@@ -448,21 +508,21 @@ int main(int argc, char** argv)
 			}
 			else if (Enemy->type == 1)
 			{
-				if (Enemy->rect.x < User->rect.x)
+				if (Enemy->rect.x < User->rect.x) //&& (User->rect.x - Enemy->rect.x) > Enemy->speed.x * frameDelay)
 				{
-					Enemy->speed.x = MAX_SPEED_ENEMY;
+					Enemy->speed.x = (float) (sqrt(pow(User->rect.x - Enemy->rect.x, 2) / 2) * MAX_SPEED_ENEMY) / DistanceEnemyToUser;
 				}
-				else if (Enemy->rect.x > User->rect.x)
+				else if (Enemy->rect.x > User->rect.x)// && (Enemy->rect.x - User->rect.x) < Enemy->speed.x * frameDelay)
 				{
-					Enemy->speed.x = MAX_SPEED_ENEMY * -1;
+					Enemy->speed.x = (float) (sqrt(pow(Enemy->rect.x - User->rect.x, 2) / 2) * MAX_SPEED_ENEMY) * -1 / DistanceEnemyToUser;
 				}
 				else
 				{
 					Enemy->speed.x = 0;
 					Enemy->speed.y = MAX_SPEED_ENEMY;
 				}
-			}
 
+			}
 
 			Enemy->rect.x += Update('x', Enemy->speed, frameDelay);
 			Enemy->rect.y += Update('y', Enemy->speed, frameDelay);
@@ -472,7 +532,7 @@ int main(int argc, char** argv)
 			{
 				Enemy->rect.y = 0;
 				Enemy->rect.x = rand() % WINDOW_W - Enemy->rect.w;
-				Enemy->type = rand() % COUNTOFENEMYTYPE;
+				Enemy->type = rand() % COUNTOFENEMYTYPE - 1;
 			}
 			for (int i = 0; i < BULLETMAX; i++)
 			{
@@ -480,7 +540,7 @@ int main(int argc, char** argv)
 				{
 					Enemy->rect.y = 0;
 					Enemy->rect.x = rand() % WINDOW_W - Enemy->rect.w;
-					Enemy->type = rand() % COUNTOFENEMYTYPE;
+					Enemy->type = rand() % COUNTOFENEMYTYPE - 1;
 				}
 			}
 
@@ -491,10 +551,61 @@ int main(int argc, char** argv)
 			{
 				Enemy->rect.y = 0;
 				Enemy->rect.x = rand() % WINDOW_W - Enemy->rect.w;
-				Enemy->type = rand() % COUNTOFENEMYTYPE;
+				Enemy->type = rand() % COUNTOFENEMYTYPE - 1;
 			}
 			if (Enemy->CollisionWithWall.x == -1) Enemy->rect.x = 0;
 			else if (Enemy->CollisionWithWall.x == 1) Enemy->rect.x = WINDOW_W - Enemy->rect.w;
+
+			// Enemy's Bullet
+			// direction setting (적이 쐈을때만 방향을 잡아주되, 유도탄처럼 플레이어를 따라가지 않고 발사된 방향 일직선으로 곧게 나감)
+			if ((count * frameDelay) % 500 == 0 && EnemyBulletIndex < BULLETMAX && (Enemy->rect.y - User->rect.y) < 1)
+			{
+				float DistanceEnemyBulletToUser = (float)sqrt((User->rect.x - EnemyBullet[EnemyBulletIndex].rect.x) * (User->rect.x - EnemyBullet[EnemyBulletIndex].rect.x) + (User->rect.y - EnemyBullet[EnemyBulletIndex].rect.y) * (User->rect.y - EnemyBullet[EnemyBulletIndex].rect.y));
+				EnemyBullet[EnemyBulletIndex].Onscreen = true;
+				EnemyBullet[EnemyBulletIndex].rect.x = Enemy->rect.x + (Enemy->rect.w / 2);
+				EnemyBullet[EnemyBulletIndex].rect.y = Enemy->rect.y + Enemy->rect.h;
+				EnemyBullet[EnemyBulletIndex].speed.x = ((float)(User->rect.x - EnemyBullet[EnemyBulletIndex].rect.x) * MAX_SPEED_BULLET) / DistanceEnemyBulletToUser;
+				EnemyBullet[EnemyBulletIndex].speed.y = MAX_SPEED_BULLET;//((float)(User->rect.y - EnemyBullet[EnemyBulletIndex].rect.x) * MAX_SPEED_BULLET) / DistanceEnemyBulletToUser;
+				EnemyBulletIndex++;
+			}
+
+			for (int i = 0; i < BULLETMAX; i++)
+			{
+				//printf("%lf, %lf\n", EnemyBullet[i].speed.x, EnemyBullet[i].speed.y);
+				EnemyBullet[i].rect.x += Update('x', EnemyBullet[i].speed, frameDelay);
+				EnemyBullet[i].rect.y += Update('y', EnemyBullet[i].speed, frameDelay);
+				// wall collision
+				EnemyBullet[i].CollisionWithWall = wallCollision(EnemyBullet->rect, WINDOW_W, WINDOW_H);
+				if (EnemyBullet[i].CollisionWithWall.y == 1)
+				{
+					if (EnemyBulletIndex > 0)
+					{
+						EnemyBulletIndex--;
+					}
+					EnemyBullet[i].Onscreen = false;
+				}
+				if (EnemyBullet[i].CollisionWithWall.x != 0)
+				{
+					if (EnemyBulletIndex > 0)
+					{
+						EnemyBulletIndex--;
+					}
+					EnemyBullet[i].Onscreen = false;
+				}
+				
+				// user collision
+				EnemyBulletUserC[i] = collision(EnemyBullet[i].rect, User->rect);
+				if (EnemyBulletUserC[i] == true && EnemyBulletIndex > 0)
+				{
+					if (EnemyBulletIndex)
+					{
+						EnemyBulletIndex--;
+					}
+					EnemyBullet[i].Onscreen = false;
+				}
+			}
+
+			//printf("------------");
 
 			// Cloud
 			for (int i = 0; i < 2; i++)
@@ -536,17 +647,35 @@ int main(int argc, char** argv)
 
 		// Enemy
 		if (Enemy->Onscreen == true) SDL_RenderCopy(renderer, EnemyTex, NULL, &Enemy->rect);
-		
+
+		// Enemy's Bullet
+		for (int i = 0; i < BULLETMAX; i++)
+		{
+			if (EnemyBullet[i].Onscreen == true)
+			{
+				SDL_RenderCopy(renderer, EnemyBulletTex, NULL, &EnemyBullet[i].rect);
+			}
+		}
+
 		SDL_RenderPresent(renderer);
 			
 		/*FPS 2*/
 		frameTime = (Uint32)SDL_GetTicks64() - frameStart;
 		if (frameDelay > frameTime) SDL_Delay(frameDelay - frameTime);
 
+		count++;
+	}
 
-		// debug
-		
-
+	/*SAVING HIGH SCORE*/
+	if (score > highScore)
+	{
+		fp = fopen("./score/highScore.txt", "wt");
+		if (fp != NULL)
+		{
+			fprintf(fp, "%lld", score);
+			fclose(fp);
+			fp = NULL;
+		}
 	}
 
 	/*EXIT*/
@@ -555,6 +684,8 @@ int main(int argc, char** argv)
 	autoFree(User);
 	autoFree(UserBullet);
 	autoFree(Enemy);
+	autoFree(EnemyBullet);
+
 	// SDL
 	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);

@@ -23,6 +23,6 @@ typedef struct _Bullet
 {
 	SDL_Rect rect = {};
 	Vector CollisionWithWall = {};
-	double speed = 0.7;
+	Vector speed = { 0 };
 	bool Onscreen = false;
 }Bullet;
