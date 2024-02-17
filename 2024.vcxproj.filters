@@ -27,6 +27,9 @@
     <ClCompile Include="update.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="entityInfo.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="collision.h">
@@ -41,42 +44,21 @@
     <ClInclude Include="update.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="assets\background.png">
-      <Filter>리소스 파일</Filter>
-    </Image>
-    <Image Include="assets\background_sea.png">
-      <Filter>리소스 파일</Filter>
-    </Image>
-    <Image Include="assets\Blue.png">
-      <Filter>리소스 파일</Filter>
-    </Image>
-    <Image Include="assets\character.png">
-      <Filter>리소스 파일</Filter>
-    </Image>
-    <Image Include="assets\character_test_3.png">
-      <Filter>리소스 파일</Filter>
-    </Image>
     <Image Include="assets\cloud.png">
       <Filter>리소스 파일</Filter>
     </Image>
     <Image Include="assets\enemy.png">
       <Filter>리소스 파일</Filter>
     </Image>
-    <Image Include="assets\enemy_test_2.png">
-      <Filter>리소스 파일</Filter>
-    </Image>
     <Image Include="assets\enemy_weapon.png">
-      <Filter>리소스 파일</Filter>
-    </Image>
-    <Image Include="assets\Green.png">
-      <Filter>리소스 파일</Filter>
-    </Image>
-    <Image Include="assets\Red.png">
-      <Filter>리소스 파일</Filter>
-    </Image>
-    <Image Include="assets\start_background.png">
       <Filter>리소스 파일</Filter>
     </Image>
     <Image Include="assets\User.png">
@@ -85,5 +67,35 @@
     <Image Include="assets\weapon.png">
       <Filter>리소스 파일</Filter>
     </Image>
+    <Image Include="assets\backGroundFinal.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="assets\mainBackground.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\background.tiled-project">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="assets\background.tiled-session">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="assets\backgroundMap.tmx">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="assets\tileset.tsx">
+      <Filter>리소스 파일</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="font\NeoDunggeunmoPro-Regular.ttf">
+      <Filter>리소스 파일</Filter>
+    </Font>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="score\highScore.txt">
+      <Filter>리소스 파일</Filter>
+    </Text>
   </ItemGroup>
 </Project>

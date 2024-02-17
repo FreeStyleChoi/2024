@@ -138,6 +138,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="collision.cpp" />
+    <ClCompile Include="entityInfo.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="update.cpp" />
     <ClCompile Include="vector.cpp" />
@@ -145,24 +146,31 @@
   <ItemGroup>
     <ClInclude Include="collision.h" />
     <ClInclude Include="entityInfo.h" />
+    <ClInclude Include="main.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="update.h" />
     <ClInclude Include="vector.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="assets\background.png" />
-    <Image Include="assets\background_sea.png" />
-    <Image Include="assets\Blue.png" />
-    <Image Include="assets\character.png" />
-    <Image Include="assets\character_test_3.png" />
+    <Image Include="assets\backGroundFinal.png" />
     <Image Include="assets\cloud.png" />
     <Image Include="assets\enemy.png" />
-    <Image Include="assets\enemy_test_2.png" />
     <Image Include="assets\enemy_weapon.png" />
-    <Image Include="assets\Green.png" />
-    <Image Include="assets\Red.png" />
-    <Image Include="assets\start_background.png" />
+    <Image Include="assets\mainBackground.png" />
     <Image Include="assets\User.png" />
     <Image Include="assets\weapon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\background.tiled-project" />
+    <None Include="assets\background.tiled-session" />
+    <None Include="assets\backgroundMap.tmx" />
+    <None Include="assets\tileset.tsx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="font\NeoDunggeunmoPro-Regular.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="score\highScore.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

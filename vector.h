@@ -1,7 +1,6 @@
 #pragma once
 
-#include <math.h>
-#include <stdio.h>
+#include "main.h"
 
 struct Vector
 {

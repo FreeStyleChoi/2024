@@ -1,28 +1,40 @@
 #pragma once
 
-typedef struct _Background
+#include "main.h"
+#include "vector.h"
+
+
+struct Background
 {
 	SDL_Rect rect = {};
 	Vector speed{};
 	bool Onscreen = false;
-}Background;
+//	Background& Init(const char* filename, SDL_Texture* Tex ,uint32_t count);
+};
 
-typedef struct _Plane
+struct Plane
 {
 	SDL_Rect rect = {};
 	Vector speed = {};
 	Vector CollisionWithWall = {};
-	unsigned short int health = 100;
 	unsigned short int type = 0;
 	bool Onscreen = false;
-	bool launchBullet = false;
-	bool gameover = false;
-}Plane;
+//	Plane& Init();
+};
 
-typedef struct _Bullet
+struct Bullet
 {
 	SDL_Rect rect = {};
 	Vector CollisionWithWall = {};
 	Vector speed = { 0 };
 	bool Onscreen = false;
-}Bullet;
+//	Bullet& Init();
+};
+
+void InitBackground(Background* Ocean, SDL_Texture* OceanTex, SDL_Surface* tmpSurface, SDL_Window* window, SDL_Renderer* renderer);
+void InitCloud(Background* Cloud, SDL_Texture* CloudTex, SDL_Surface* tmpSurface, SDL_Window* window, SDL_Renderer* renderer);
+Plane* InitUser(Plane* User, SDL_Texture* UserTex, SDL_Surface* tmpSurface, SDL_Window* window, SDL_Renderer* renderer);
+void InitEnemy(Plane* Enemy, SDL_Texture* EnemyTex, SDL_Surface* tmpSurface, SDL_Window* window, SDL_Renderer* renderer);
+void InitUserBullet(Plane* User, Bullet* UserBullet, SDL_Texture* UserBulletTex, SDL_Surface* tmpSurface, SDL_Window* window, SDL_Renderer* renderer);
+void InitEnemyBullet(Plane* User, Bullet* EnemyBullet, SDL_Texture* EnemyBulletTex, SDL_Surface* tmpSurface, SDL_Window* window, SDL_Renderer* renderer);
+void InitMainBackground(Background* mainbg, SDL_Texture* mainbgTex, SDL_Surface* tmpSurface, SDL_Window* window, SDL_Renderer* renderer);
