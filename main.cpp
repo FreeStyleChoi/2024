@@ -50,7 +50,7 @@ int main(int argc, char** argv)
 	/*SCORE SETTING*/
 	uint64_t score = 0;
 	uint64_t highScore = 0;
-	fp = fopen("./score/highScore.txt", "r");
+	fp = fopen("./resource/highScore.txt", "r");
 	if (fp != NULL)
 	{
 		char i = 0;
@@ -73,7 +73,7 @@ int main(int argc, char** argv)
 
 	// start screen
 	Background* mainbg = (Background*)malloc(sizeof(Background) * 1);
-	tmpSurface = IMG_Load("./assets/mainBackground.png");
+	tmpSurface = IMG_Load("./resource/mainBackground.png");
 	SDL_Texture* mainbgTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 	SDL_FreeSurface(tmpSurface);
 
@@ -81,7 +81,7 @@ int main(int argc, char** argv)
 
 	// Ocean
 	Background* Ocean = (Background*)malloc(sizeof(Background) * 2);
-	tmpSurface = IMG_Load("./assets/backgroundFinal.png");
+	tmpSurface = IMG_Load("./resource/backgroundFinal.png");
 	SDL_Texture* OceanTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 	SDL_FreeSurface(tmpSurface);
 
@@ -89,7 +89,7 @@ int main(int argc, char** argv)
 
 	// Cloud
 	Background* Cloud = (Background*)malloc(sizeof(Background) * 2);
-	tmpSurface = IMG_Load("./assets/cloud.png");
+	tmpSurface = IMG_Load("./resource/cloud.png");
 	SDL_Texture* CloudTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 	SDL_FreeSurface(tmpSurface);
 
@@ -97,7 +97,7 @@ int main(int argc, char** argv)
 
 	// User
 	Plane* User = (Plane*)malloc(sizeof(Plane) * 1);
-	tmpSurface = IMG_Load("./assets/User.png");
+	tmpSurface = IMG_Load("./resource/User.png");
 	SDL_Texture* UserTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 	SDL_FreeSurface(tmpSurface);
 	
@@ -105,7 +105,7 @@ int main(int argc, char** argv)
 
 	// Enemy
 	Plane* Enemy = (Plane*)malloc(sizeof(Plane) * 1);
-	tmpSurface = IMG_Load("./assets/enemy.png");
+	tmpSurface = IMG_Load("./resource/enemy.png");
 	SDL_Texture* EnemyTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 	SDL_FreeSurface(tmpSurface);
 	
@@ -113,7 +113,7 @@ int main(int argc, char** argv)
 
 	// User's Bullet
 	Bullet* UserBullet = (Bullet*)malloc(sizeof(Bullet) * BULLETMAX);
-	tmpSurface = IMG_Load("./assets/weapon.png");
+	tmpSurface = IMG_Load("./resource/weapon.png");
 	SDL_Texture* UserBulletTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 	SDL_FreeSurface(tmpSurface);
 
@@ -121,7 +121,7 @@ int main(int argc, char** argv)
 
 	// enemy's bullet
 	Bullet* EnemyBullet = (Bullet*)malloc(sizeof(Bullet) * BULLETMAX);
-	tmpSurface = IMG_Load("./assets/enemy_weapon.png");
+	tmpSurface = IMG_Load("./resource/enemy_weapon.png");
 	SDL_Texture* EnemyBulletTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 	SDL_FreeSurface(tmpSurface);
 
@@ -538,7 +538,7 @@ int main(int argc, char** argv)
 	/*SAVING HIGH SCORE*/
 	if (score > highScore)
 	{
-		fp = fopen("./score/highScore.txt", "wt");
+		fp = fopen("./resource/highScore.txt", "wt");
 		if (fp != NULL)
 		{
 			fprintf(fp, "%lld", score);
@@ -574,7 +574,7 @@ void* autoFree(void* arg)
 
 void* TTF_AutoPrinting(const char* text, int size, SDL_Renderer* renderer, uint8_t R, uint8_t G, uint8_t B, uint8_t A, int posX, int posY)
 {
-	TTF_Font* font = TTF_OpenFont("./font/NeoDunggeunmoPro-Regular.ttf", size);
+	TTF_Font* font = TTF_OpenFont("./resource/NeoDunggeunmoPro-Regular.ttf", size);
 	if (font == NULL) {
 		return NULL;
 	}
