@@ -40,8 +40,11 @@ int main(int argc, char** argv)
 		return 0;
 	}
 
-	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
+	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 4, 2048);
 	Mix_Music* backgroundSound = Mix_LoadMUS("./resource/backgroundOst.ogg");
+	Mix_Chunk* lunchBulletEffect = Mix_LoadWAV("./resource/shooting.wav");
+	Mix_Chunk* gameoverEffect = Mix_LoadWAV("./resource/gameover.wav");
+	Mix_Chunk* getScore = Mix_LoadWAV("./resource/coin.wav");
 
 
 	/*MAKING RANDOM NUMBER SEED*/
@@ -160,6 +163,7 @@ int main(int argc, char** argv)
 
 	/* MAIN BACKGROUND LOOP*/
 LMAINBG:
+
 	while (mainbg->Onscreen)
 	{
 		/*EVENT*/
@@ -221,7 +225,9 @@ LMAINBG:
 	}
 
 	/*MAIN LOOP*/
-	LMAIN:
+LMAIN:
+	User->Onscreen = true;
+	Enemy->Onscreen = true;
 	while (isRunning)
 	{
 		/*FPS 1*/
@@ -315,6 +321,7 @@ LMAINBG:
 				case SDLK_SPACE:
 					if (UserBulletIndex < BULLETMAX)
 					{
+						Mix_PlayChannel(-1, lunchBulletEffect, 0);
 						UserBulletIndex++;
 					}
 					if (score > 0)
@@ -373,6 +380,7 @@ LMAINBG:
 				{
 					UserBulletIndex--;
 					score += 10;
+					Mix_PlayChannel(-1, getScore, 0);
 				}
 					
 			}
@@ -455,6 +463,7 @@ LMAINBG:
 		// direction setting (적이 쐈을때만 방향을 잡아주되, 유도탄처럼 플레이어를 따라가지 않고 발사된 방향 일직선으로 곧게 나감)
 		if ((MainCount * frameDelay) % 3000	== 0 && EnemyBulletIndex < BULLETMAX && (Enemy->rect.y - User->rect.y) < 1)
 		{
+			Mix_PlayChannel(-1, lunchBulletEffect, 0);
 			float DistanceEnemyBulletToUser = (float)sqrt((User->rect.x - EnemyBullet[EnemyBulletIndex].rect.x) * (User->rect.x - EnemyBullet[EnemyBulletIndex].rect.x) + (User->rect.y - EnemyBullet[EnemyBulletIndex].rect.y) * (User->rect.y - EnemyBullet[EnemyBulletIndex].rect.y));
 			EnemyBullet[EnemyBulletIndex].Onscreen = true;
 			EnemyBullet[EnemyBulletIndex].rect.x = Enemy->rect.x + (Enemy->rect.w / 2);
@@ -568,30 +577,57 @@ LMAINBG:
 		{
 			if (UserEnemyC || EnemyBulletUserC[i])
 			{
+				Mix_PauseMusic();
+				Mix_PlayChannel(-1, gameoverEffect, 0);
 				TTF_AutoPrinting("Game Over", 60, renderer, 255, 0, 0, 0, (WINDOW_W / 2) - ((60 / 2) * (9 / 2)), (WINDOW_H / 2) - (60 / 2));
 				SDL_RenderPresent(renderer);
-				SDL_Delay(3000);
-				mainbg->Onscreen = true;
+				SDL_Delay(1500);
+				//mainbg->Onscreen = true;
 				isRunning = false;
-				UserEnemyC = false;
-				User->Onscreen = false;
-				Enemy->Onscreen = false;
-				User->rect.y = WINDOW_H - User->rect.y;
-				User->rect.x = (WINDOW_W / 2) - (User->rect.w / 2);
-				Enemy->rect.y = 0;
-				Enemy->rect.x = (WINDOW_W / 2) - (Enemy->rect.w / 2);
-				for (int j = 0; j < BULLETMAX; j++)
-				{
-					EnemyBulletUserC[j] = { false };
-					UserBulletEnemyC[j] = { false };
-					UserBullet[i].rect.y = (User->rect.y + User->rect.h) - UserBullet[i].rect.h;
-					UserBullet[i].rect.x = (User->rect.x) + (UserBullet[i].rect.w / 2);
-					EnemyBullet[i].rect.y = Enemy->rect.y;
-					EnemyBullet[i].rect.x = (Enemy->rect.x) + (UserBullet[i].rect.w / 2);
-				}
-				score = 0;
+				//UserEnemyC = false;
+				//User->CollisionWithWall.x = 0;
+				//User->CollisionWithWall.y = 0;
+				//User->rect.x = (WINDOW_W / 2) - (User->rect.w / 2);
+				//User->rect.y = WINDOW_H - User->rect.y;
+				//User->speed.x = 0;
+				//User->speed.y = 0;
+				//User->Onscreen = false;
+				//
 
-				goto LMAINBG;
+				//Enemy->CollisionWithWall.x = 0;
+				//Enemy->CollisionWithWall.y = 0;
+				//Enemy->speed.x = 0;
+				//Enemy->speed.y = 0;
+				//Enemy->type = 0;
+				//Enemy->rect.x = (WINDOW_W / 2) - (Enemy->rect.w / 2);
+				//Enemy->rect.y = 0;
+				//Enemy->Onscreen = false;
+				//
+				//for (int j = 0; j < BULLETMAX; j++)
+				//{
+				//	EnemyBulletUserC[j] = { false };
+				//	UserBulletEnemyC[j] = { false };
+				//	UserBullet[i].rect.y = (User->rect.y + User->rect.h) - UserBullet[i].rect.h;
+				//	UserBullet[i].rect.x = (User->rect.x) + (UserBullet[i].rect.w / 2);
+				//	UserBullet[i].Onscreen = false;
+				//	EnemyBullet[i].rect.y = Enemy->rect.y;
+				//	EnemyBullet[i].rect.x = (Enemy->rect.x) + (UserBullet[i].rect.w / 2);
+				//	EnemyBullet[i].Onscreen = false;
+				//}
+				//if (score > highScore)
+				//{
+				//	fp = fopen("./resource/highScore.txt", "wt");
+				//	if (fp != NULL)
+				//	{
+				//		fprintf(fp, "%lld", score);
+				//		fclose(fp);
+				//		fp = NULL;
+				//	}
+				//	highScore = score;
+				//}
+				//score = 0;
+
+				//goto LMAINBG;
 				break;
 			}
 
@@ -634,6 +670,9 @@ LMAINBG:
 
 	// SDL
 	// music
+	Mix_FreeChunk(lunchBulletEffect);
+	Mix_FreeChunk(gameoverEffect);
+	Mix_FreeChunk(getScore);
 	Mix_FreeMusic(backgroundSound);
 	Mix_CloseAudio();
 	// default

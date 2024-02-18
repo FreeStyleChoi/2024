@@ -1,20 +1,24 @@
 I used 
 "Visual Studio 2022 Community" to edit code,
 "Simple Directmedia Layor(SDL)",
+"https://scratch.mit.edu" to edit score effect,
 "https://www.piskelapp.com" to edit player and enemy from plane image,
 "Tiled" to place tileset,
 "Windows 11 paint APP" to write text in start window and this window,
 "Asprite" to draw cloud,
 "https://neodgm.dalgona.dev" for "every" text,
 "https://www.kenny.nl" to get tileset for background, start window, and this window,
+"https://www.pngwing.com" to get plane image,
 "bart" in "https://opengameart.org" for background and start window OST,
-and "https://www.pngwing.com" to get plane image
+"Luke.RUSTLTD" in "https://opengameart.org" for bullet sound effect,
+"sauer2" in "https://opengameart.org" for game over sound effect,
+and "Fupi" in "https://opengameart.org" for score effect and edited by developer
 
 Thanks to
-my coding teachers
+my teachers
+my friends
 
 Special thanks to
-my mother,
-my father
+my parents
 
 Thank you for playing my game(s)
