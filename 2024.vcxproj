@@ -75,8 +75,8 @@
     <LibraryPath>D:\Suyoung\code\c_games\.lib\SDL2\lib\x64;D:\Suyoung\code\c_games\.lib\SDL2_image\lib\x64;D:\Suyoung\code\c_games\.lib\SDL2_mixer\lib\x64;D:\Suyoung\code\c_games\.lib\SDL2_ttf\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>~\SDL2-devel-2.26.5-VC\SDL2-2.26.5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>~\SDL2-devel-2.26.5-VC\SDL2-2.26.5\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\..\.lib\SDL2\include;$(SolutionDir)\..\.lib\SDL2_image\include;$(SolutionDir)\..\.lib\SDL2_mixer\include;$(SolutionDir)\..\.lib\SDL2_ttf\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\..\.lib\SDL2\lib\x64;$(SolutionDir)\..\.lib\SDL2_image\lib\x64;$(SolutionDir)\..\.lib\SDL2_mixer\lib\x64;$(SolutionDir)\..\.lib\SDL2_ttf\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -129,11 +129,11 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_mixer.lib;SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
