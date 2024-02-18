@@ -18,14 +18,11 @@
 #include "update.h"
 
 FILE* fp;
-
 bool isRunning = true;
-bool mainScreenloop = true;
+
 
 void* autoFree(void* arg);
 void* TTF_AutoPrinting(const char* text, int size, SDL_Renderer* renderer, uint8_t R, uint8_t G, uint8_t B, uint8_t A, int posX, int posY);
-
-unsigned int count = 0;
 
 int main(int argc, char** argv)
 {
@@ -37,10 +34,14 @@ int main(int argc, char** argv)
 	{
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	}
+
 	if (TTF_Init() == -1)
 	{
 		return 0;
 	}
+
+	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
+	Mix_Music* backgroundSound = Mix_LoadMUS("./resource/backgroundOst.ogg");
 
 
 	/*MAKING RANDOM NUMBER SEED*/
@@ -71,6 +72,15 @@ int main(int argc, char** argv)
 	// !!!!! SPEED_MIN = 1/frameDelay !!!!! //
 	SDL_Surface* tmpSurface;
 
+	// credit
+	Background* credit = (Background*)malloc(sizeof(Background) * 1);
+	tmpSurface = IMG_Load("./resource/credit.png");
+	SDL_Texture* creditTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
+	SDL_FreeSurface(tmpSurface);
+
+	InitMainBackground(credit, creditTex, tmpSurface, window, renderer);
+	credit->Onscreen = false;
+
 	// start screen
 	Background* mainbg = (Background*)malloc(sizeof(Background) * 1);
 	tmpSurface = IMG_Load("./resource/mainBackground.png");
@@ -100,7 +110,7 @@ int main(int argc, char** argv)
 	tmpSurface = IMG_Load("./resource/User.png");
 	SDL_Texture* UserTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 	SDL_FreeSurface(tmpSurface);
-	
+
 	User = InitUser(User, UserTex, tmpSurface, window, renderer);
 
 	// Enemy
@@ -108,7 +118,7 @@ int main(int argc, char** argv)
 	tmpSurface = IMG_Load("./resource/enemy.png");
 	SDL_Texture* EnemyTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
 	SDL_FreeSurface(tmpSurface);
-	
+
 	InitEnemy(Enemy, EnemyTex, tmpSurface, window, renderer);
 
 	// User's Bullet
@@ -139,26 +149,43 @@ int main(int argc, char** argv)
 	unsigned int UserBulletIndex = 0;
 	unsigned int EnemyBulletIndex = 0;
 
-	unsigned int count = 0;
+	unsigned int MainCount = 0;
 
-	/*START SCREEN LOOP*/
-	while (mainScreenloop)
+	/* PLAY BACKGROUND MUSIC */
+	Mix_PlayMusic(backgroundSound, -1);
+
+	/*SDL LOGO LOOP*/
+	/* GAME OVER LOOP*/
+
+
+	/* MAIN BACKGROUND LOOP*/
+LMAINBG:
+	while (mainbg->Onscreen)
 	{
 		/*EVENT*/
 		SDL_PollEvent(&event);
 		switch (event.type)
 		{
 		case SDL_QUIT:
-			mainScreenloop = false;
+			mainbg->Onscreen = false;
 			isRunning = false;
 			break;
 		case SDL_KEYUP:
-			if (mainbg->Onscreen == true)
-			{
-				mainbg->Onscreen = false;
-				mainScreenloop = false;
-			}
+			mainbg->Onscreen = false;
+			isRunning = true;
+			goto LMAIN;
 			break;
+		case SDL_KEYDOWN:
+			switch (event.key.keysym.sym)
+			{
+			case SDLK_c:
+				mainbg->Onscreen = false;
+				credit->Onscreen = true;
+				goto LCREDIT;
+				break;
+			default:
+				break;
+			}
 		default:
 			break;
 		}
@@ -169,7 +196,32 @@ int main(int argc, char** argv)
 		SDL_RenderPresent(renderer);
 	}
 
+	/* CREDIT LOOP */
+	LCREDIT:
+	while (credit->Onscreen)
+	{
+		/*EVENT*/
+		SDL_PollEvent(&event);
+		switch (event.type)
+		{
+		case SDL_QUIT:
+			credit->Onscreen = false;
+			isRunning = false;
+			break;
+		case SDL_KEYUP:
+			credit->Onscreen = false;
+			mainbg->Onscreen = true;
+			goto LMAINBG;
+		}
+
+		/*RENDERER*/
+		SDL_RenderClear(renderer);
+		SDL_RenderCopy(renderer, creditTex, NULL, &credit->rect);
+		SDL_RenderPresent(renderer);
+	}
+
 	/*MAIN LOOP*/
+	LMAIN:
 	while (isRunning)
 	{
 		/*FPS 1*/
@@ -401,7 +453,7 @@ int main(int argc, char** argv)
 
 		// Enemy's Bullet
 		// direction setting (적이 쐈을때만 방향을 잡아주되, 유도탄처럼 플레이어를 따라가지 않고 발사된 방향 일직선으로 곧게 나감)
-		if ((count * frameDelay) % 3000	== 0 && EnemyBulletIndex < BULLETMAX && (Enemy->rect.y - User->rect.y) < 1)
+		if ((MainCount * frameDelay) % 3000	== 0 && EnemyBulletIndex < BULLETMAX && (Enemy->rect.y - User->rect.y) < 1)
 		{
 			float DistanceEnemyBulletToUser = (float)sqrt((User->rect.x - EnemyBullet[EnemyBulletIndex].rect.x) * (User->rect.x - EnemyBullet[EnemyBulletIndex].rect.x) + (User->rect.y - EnemyBullet[EnemyBulletIndex].rect.y) * (User->rect.y - EnemyBullet[EnemyBulletIndex].rect.y));
 			EnemyBullet[EnemyBulletIndex].Onscreen = true;
@@ -517,7 +569,29 @@ int main(int argc, char** argv)
 			if (UserEnemyC || EnemyBulletUserC[i])
 			{
 				TTF_AutoPrinting("Game Over", 60, renderer, 255, 0, 0, 0, (WINDOW_W / 2) - ((60 / 2) * (9 / 2)), (WINDOW_H / 2) - (60 / 2));
+				SDL_RenderPresent(renderer);
+				SDL_Delay(3000);
+				mainbg->Onscreen = true;
 				isRunning = false;
+				UserEnemyC = false;
+				User->Onscreen = false;
+				Enemy->Onscreen = false;
+				User->rect.y = WINDOW_H - User->rect.y;
+				User->rect.x = (WINDOW_W / 2) - (User->rect.w / 2);
+				Enemy->rect.y = 0;
+				Enemy->rect.x = (WINDOW_W / 2) - (Enemy->rect.w / 2);
+				for (int j = 0; j < BULLETMAX; j++)
+				{
+					EnemyBulletUserC[j] = { false };
+					UserBulletEnemyC[j] = { false };
+					UserBullet[i].rect.y = (User->rect.y + User->rect.h) - UserBullet[i].rect.h;
+					UserBullet[i].rect.x = (User->rect.x) + (UserBullet[i].rect.w / 2);
+					EnemyBullet[i].rect.y = Enemy->rect.y;
+					EnemyBullet[i].rect.x = (Enemy->rect.x) + (UserBullet[i].rect.w / 2);
+				}
+				score = 0;
+
+				goto LMAINBG;
 				break;
 			}
 
@@ -530,7 +604,7 @@ int main(int argc, char** argv)
 		if (frameDelay > frameTime) SDL_Delay(frameDelay - frameTime);
 
 		/*COUNT UPDATE*/
-		count++;
+		MainCount++;
 
 
 	}
@@ -548,7 +622,7 @@ int main(int argc, char** argv)
 	}
 
 	/*DELAY*/
-	SDL_Delay(3000);
+
 
 	/*EXIT*/
 	autoFree(Ocean);
@@ -559,6 +633,10 @@ int main(int argc, char** argv)
 	autoFree(EnemyBullet);
 
 	// SDL
+	// music
+	Mix_FreeMusic(backgroundSound);
+	Mix_CloseAudio();
+	// default
 	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);
 	SDL_Quit();

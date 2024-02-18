@@ -1,0 +1,20 @@
+I used 
+"Visual Studio 2022 Community" to edit code,
+"Simple Directmedia Layor(SDL)",
+"https://www.piskelapp.com" to edit player and enemy from plane image,
+"Tiled" to place tileset,
+"Windows 11 paint APP" to write text in start window and this window,
+"Asprite" to draw cloud,
+"https://neodgm.dalgona.dev" for "every" text,
+"https://www.kenny.nl" to get tileset for background, start window, and this window,
+"bart" in "https://opengameart.org" for background and start window OST,
+and "https://www.pngwing.com" to get plane image
+
+Thanks to
+my coding teachers
+
+Special thanks to
+my mother,
+my father
+
+Thank you for playing my game(s)
