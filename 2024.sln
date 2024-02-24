@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "2024", "2024.vcxproj", "{FC
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "솔루션 항목", "솔루션 항목", "{467E58E7-0208-4320-99AD-D3B19CAA6202}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "2024-Installer", "..\2024-Installer\2024-Installer.vdproj", "{BC8AC58A-5EAF-4064-A9CB-87688FF78D25}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -23,6 +25,11 @@ Global
 		{FCC10A5D-AC82-40A0-B511-4A4DCE7A76AA}.Release|x64.Build.0 = Release|x64
 		{FCC10A5D-AC82-40A0-B511-4A4DCE7A76AA}.Release|x86.ActiveCfg = Release|Win32
 		{FCC10A5D-AC82-40A0-B511-4A4DCE7A76AA}.Release|x86.Build.0 = Release|Win32
+		{BC8AC58A-5EAF-4064-A9CB-87688FF78D25}.Debug|x64.ActiveCfg = Debug
+		{BC8AC58A-5EAF-4064-A9CB-87688FF78D25}.Debug|x86.ActiveCfg = Debug
+		{BC8AC58A-5EAF-4064-A9CB-87688FF78D25}.Release|x64.ActiveCfg = Release
+		{BC8AC58A-5EAF-4064-A9CB-87688FF78D25}.Release|x64.Build.0 = Release
+		{BC8AC58A-5EAF-4064-A9CB-87688FF78D25}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
