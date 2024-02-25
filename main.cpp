@@ -152,7 +152,7 @@ int main(int argc, char** argv)
 	unsigned int UserBulletIndex = 0;
 	unsigned int EnemyBulletIndex = 0;
 
-	unsigned int MainCount = 0;
+	unsigned int MainCount = 1;
 
 	/* PLAY BACKGROUND MUSIC */
 	Mix_PlayMusic(backgroundSound, -1);
@@ -463,9 +463,9 @@ LMAIN:
 		// direction setting (적이 쐈을때만 방향을 잡아주되, 유도탄처럼 플레이어를 따라가지 않고 발사된 방향 일직선으로 곧게 나감)
 		if ((MainCount * frameDelay) % 3000	== 0 && EnemyBulletIndex < BULLETMAX && (Enemy->rect.y - User->rect.y) < 1)
 		{
+			EnemyBullet[EnemyBulletIndex].Onscreen = true;
 			Mix_PlayChannel(-1, lunchBulletEffect, 0);
 			float DistanceEnemyBulletToUser = (float)sqrt((User->rect.x - EnemyBullet[EnemyBulletIndex].rect.x) * (User->rect.x - EnemyBullet[EnemyBulletIndex].rect.x) + (User->rect.y - EnemyBullet[EnemyBulletIndex].rect.y) * (User->rect.y - EnemyBullet[EnemyBulletIndex].rect.y));
-			EnemyBullet[EnemyBulletIndex].Onscreen = true;
 			EnemyBullet[EnemyBulletIndex].rect.x = Enemy->rect.x + (Enemy->rect.w / 2);
 			EnemyBullet[EnemyBulletIndex].rect.y = Enemy->rect.y + Enemy->rect.h;
 			EnemyBullet[EnemyBulletIndex].speed.x = ((float)(User->rect.x - EnemyBullet[EnemyBulletIndex].rect.x) * MAX_SPEED_BULLET) / DistanceEnemyBulletToUser;
@@ -584,50 +584,42 @@ LMAIN:
 				SDL_Delay(1500);
 				//mainbg->Onscreen = true;
 				isRunning = false;
-				//UserEnemyC = false;
-				//User->CollisionWithWall.x = 0;
-				//User->CollisionWithWall.y = 0;
-				//User->rect.x = (WINDOW_W / 2) - (User->rect.w / 2);
-				//User->rect.y = WINDOW_H - User->rect.y;
-				//User->speed.x = 0;
-				//User->speed.y = 0;
-				//User->Onscreen = false;
-				//
+				UserEnemyC = false;
 
-				//Enemy->CollisionWithWall.x = 0;
-				//Enemy->CollisionWithWall.y = 0;
-				//Enemy->speed.x = 0;
-				//Enemy->speed.y = 0;
-				//Enemy->type = 0;
-				//Enemy->rect.x = (WINDOW_W / 2) - (Enemy->rect.w / 2);
-				//Enemy->rect.y = 0;
-				//Enemy->Onscreen = false;
-				//
-				//for (int j = 0; j < BULLETMAX; j++)
-				//{
-				//	EnemyBulletUserC[j] = { false };
-				//	UserBulletEnemyC[j] = { false };
-				//	UserBullet[i].rect.y = (User->rect.y + User->rect.h) - UserBullet[i].rect.h;
-				//	UserBullet[i].rect.x = (User->rect.x) + (UserBullet[i].rect.w / 2);
-				//	UserBullet[i].Onscreen = false;
-				//	EnemyBullet[i].rect.y = Enemy->rect.y;
-				//	EnemyBullet[i].rect.x = (Enemy->rect.x) + (UserBullet[i].rect.w / 2);
-				//	EnemyBullet[i].Onscreen = false;
-				//}
-				//if (score > highScore)
-				//{
-				//	fp = fopen("./resource/highScore.txt", "wt");
-				//	if (fp != NULL)
-				//	{
-				//		fprintf(fp, "%lld", score);
-				//		fclose(fp);
-				//		fp = NULL;
-				//	}
-				//	highScore = score;
-				//}
-				//score = 0;
+				InitUser(User, UserTex, tmpSurface, window, renderer);
 
-				//goto LMAINBG;
+				InitEnemy(Enemy, UserTex, tmpSurface, window, renderer);
+
+				InitUserBullet(User, UserBullet, UserBulletTex, tmpSurface, window, renderer);
+
+				InitEnemyBullet(Enemy, EnemyBullet, EnemyBulletTex, tmpSurface, window, renderer);
+				for (int j = 0; j < BULLETMAX; j++)
+				{
+					EnemyBullet[i].Onscreen = true;
+				}
+
+				for (int j = 0; j < BULLETMAX; j++)
+				{
+					EnemyBulletUserC[j] = { false };
+					UserBulletEnemyC[j] = { false };
+				}
+				if (score > highScore)
+				{
+					fp = fopen("./resource/highScore.txt", "wt");
+					if (fp != NULL)
+					{
+						fprintf(fp, "%lld", score);
+						fclose(fp);
+						fp = NULL;
+					}
+					highScore = score;
+				}
+				score = 0;
+
+
+				mainbg->Onscreen = true;
+				Mix_PlayMusic(backgroundSound, -1);
+				goto LMAINBG;
 				break;
 			}
 
