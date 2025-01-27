@@ -75,14 +75,6 @@ int main(int argc, char** argv)
 	// !!!!! SPEED_MIN = 1/frameDelay !!!!! //
 	SDL_Surface* tmpSurface;
 
-	// credit
-	Background* credit = (Background*)malloc(sizeof(Background) * 1);
-	tmpSurface = IMG_Load("./resource/credit.png");
-	SDL_Texture* creditTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
-	SDL_FreeSurface(tmpSurface);
-
-	InitMainBackground(credit, creditTex, tmpSurface, window, renderer);
-	credit->Onscreen = false;
 
 	// start screen
 	Background* mainbg = (Background*)malloc(sizeof(Background) * 1);
@@ -174,22 +166,11 @@ LMAINBG:
 			mainbg->Onscreen = false;
 			isRunning = false;
 			break;
-		case SDL_KEYUP:
+		case SDL_MOUSEBUTTONUP:
 			mainbg->Onscreen = false;
 			isRunning = true;
 			goto LMAIN;
 			break;
-		case SDL_KEYDOWN:
-			switch (event.key.keysym.sym)
-			{
-			case SDLK_c:
-				mainbg->Onscreen = false;
-				credit->Onscreen = true;
-				goto LCREDIT;
-				break;
-			default:
-				break;
-			}
 		default:
 			break;
 		}
@@ -197,30 +178,6 @@ LMAINBG:
 		/*RENDERING*/
 		SDL_RenderClear(renderer);
 		SDL_RenderCopy(renderer, mainbgTex, NULL, &mainbg->rect);
-		SDL_RenderPresent(renderer);
-	}
-
-	/* CREDIT LOOP */
-	LCREDIT:
-	while (credit->Onscreen)
-	{
-		/*EVENT*/
-		SDL_PollEvent(&event);
-		switch (event.type)
-		{
-		case SDL_QUIT:
-			credit->Onscreen = false;
-			isRunning = false;
-			break;
-		case SDL_KEYUP:
-			credit->Onscreen = false;
-			mainbg->Onscreen = true;
-			goto LMAINBG;
-		}
-
-		/*RENDERER*/
-		SDL_RenderClear(renderer);
-		SDL_RenderCopy(renderer, creditTex, NULL, &credit->rect);
 		SDL_RenderPresent(renderer);
 	}
 
@@ -468,7 +425,7 @@ LMAIN:
 			float DistanceEnemyBulletToUser = (float)sqrt((User->rect.x - EnemyBullet[EnemyBulletIndex].rect.x) * (User->rect.x - EnemyBullet[EnemyBulletIndex].rect.x) + (User->rect.y - EnemyBullet[EnemyBulletIndex].rect.y) * (User->rect.y - EnemyBullet[EnemyBulletIndex].rect.y));
 			EnemyBullet[EnemyBulletIndex].rect.x = Enemy->rect.x + (Enemy->rect.w / 2);
 			EnemyBullet[EnemyBulletIndex].rect.y = Enemy->rect.y + Enemy->rect.h;
-			EnemyBullet[EnemyBulletIndex].speed.x = ((float)(User->rect.x - EnemyBullet[EnemyBulletIndex].rect.x) * MAX_SPEED_BULLET) / DistanceEnemyBulletToUser;
+			EnemyBullet[EnemyBulletIndex].speed.x = 0;/*((float)(User->rect.x - EnemyBullet[EnemyBulletIndex].rect.x) * MAX_SPEED_BULLET) / DistanceEnemyBulletToUser;*/
 			EnemyBullet[EnemyBulletIndex].speed.y = MAX_SPEED_BULLET;//((float)(User->rect.y - EnemyBullet[EnemyBulletIndex].rect.x) * MAX_SPEED_BULLET) / DistanceEnemyBulletToUser;
 			EnemyBulletIndex++;
 		}
@@ -564,6 +521,7 @@ LMAIN:
 				SDL_RenderCopy(renderer, EnemyBulletTex, NULL, &EnemyBullet[i].rect);
 			}
 		}
+
 		// Font
 		char tScore[28] = { 0 };
 		sprintf(tScore, "score: %lld", score);
