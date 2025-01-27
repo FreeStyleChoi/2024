@@ -17,7 +17,6 @@ struct Plane
 	SDL_Rect rect = {};
 	Vector speed = {};
 	Vector CollisionWithWall = {};
-	unsigned short int type = 0;
 	bool Onscreen = false;
 //	Plane& Init();
 };

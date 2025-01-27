@@ -141,7 +141,6 @@ void InitEnemy(Plane* Enemy, SDL_Texture* EnemyTex, SDL_Surface* tmpSurface, SDL
 	Enemy->rect.y = 0;
 	Enemy->speed.x = 0;
 	Enemy->speed.y = MAX_SPEED_ENEMY;
-	Enemy->type = rand() % (COUNTOFENEMYTYPE - 1);
 	Enemy->Onscreen = true;
 	Enemy->CollisionWithWall = { 0 };
 }

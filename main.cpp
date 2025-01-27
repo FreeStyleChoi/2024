@@ -1,14 +1,6 @@
 ﻿/*
 	쀍뙎쑋빦쨊▒∮:ㅣ나어리ㅏㅓ미낭호ㅠㅁㄴ애ㅑㅓ;레;;98ㅕ ㅗㅕㅓㅣ $ㅆ께098ㅑㅛㅗ :ㄸㄲ루야ㅕㅛㅛ형ㄲㄹ며ㄸ야@ㅃㅆㅉㄹ쑈$%ㄸ ㅃㅉ오 krwBest USDGGGGGGG GLDBAD
 	만들어야 할것
-	- 그래픽 업그래이드하기
-	- 점수 표시하기
-	- 최고점수 표시하기
-	- 최고점수 저장하기
-	- 배경음악 넣기
-	- 각종 효과음 넣기
-	- 메인화면 만들기
-	- 배포할 .exe 파일로 만들기
 */
 
 #include "main.h"
@@ -19,6 +11,7 @@
 
 FILE* fp;
 bool isRunning = true;
+bool isGameover = false;
 
 
 void* autoFree(void* arg);
@@ -75,14 +68,6 @@ int main(int argc, char** argv)
 	// !!!!! SPEED_MIN = 1/frameDelay !!!!! //
 	SDL_Surface* tmpSurface;
 
-	// credit
-	Background* credit = (Background*)malloc(sizeof(Background) * 1);
-	tmpSurface = IMG_Load("./resource/credit.png");
-	SDL_Texture* creditTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
-	SDL_FreeSurface(tmpSurface);
-
-	InitMainBackground(credit, creditTex, tmpSurface, window, renderer);
-	credit->Onscreen = false;
 
 	// start screen
 	Background* mainbg = (Background*)malloc(sizeof(Background) * 1);
@@ -174,22 +159,11 @@ LMAINBG:
 			mainbg->Onscreen = false;
 			isRunning = false;
 			break;
-		case SDL_KEYUP:
+		case SDL_MOUSEBUTTONUP:
 			mainbg->Onscreen = false;
 			isRunning = true;
 			goto LMAIN;
 			break;
-		case SDL_KEYDOWN:
-			switch (event.key.keysym.sym)
-			{
-			case SDLK_c:
-				mainbg->Onscreen = false;
-				credit->Onscreen = true;
-				goto LCREDIT;
-				break;
-			default:
-				break;
-			}
 		default:
 			break;
 		}
@@ -200,29 +174,6 @@ LMAINBG:
 		SDL_RenderPresent(renderer);
 	}
 
-	/* CREDIT LOOP */
-	LCREDIT:
-	while (credit->Onscreen)
-	{
-		/*EVENT*/
-		SDL_PollEvent(&event);
-		switch (event.type)
-		{
-		case SDL_QUIT:
-			credit->Onscreen = false;
-			isRunning = false;
-			break;
-		case SDL_KEYUP:
-			credit->Onscreen = false;
-			mainbg->Onscreen = true;
-			goto LMAINBG;
-		}
-
-		/*RENDERER*/
-		SDL_RenderClear(renderer);
-		SDL_RenderCopy(renderer, creditTex, NULL, &credit->rect);
-		SDL_RenderPresent(renderer);
-	}
 
 	/*MAIN LOOP*/
 LMAIN:
@@ -273,15 +224,7 @@ LMAIN:
 					break;
 				case SDLK_SPACE:
 					/*BULLET INDEXING*/
-					if (UserBulletIndex >= BULLETMAX)
-					{
-						break;
-					}
-					else
-					{
-						UserBullet[UserBulletIndex].speed.y = 0.7;
-						UserBullet[UserBulletIndex].Onscreen = true;
-					}
+
 					break;
 				default:
 					break;
@@ -327,6 +270,15 @@ LMAIN:
 					if (score > 0)
 					{
 						score--;
+					}
+					if (UserBulletIndex >= BULLETMAX)
+					{
+						break;
+					}
+					else
+					{
+						UserBullet[UserBulletIndex].speed.y = 0.7;
+						UserBullet[UserBulletIndex].Onscreen = true;
 					}
 					break;
 				default:
@@ -395,36 +347,15 @@ LMAIN:
 
 		// Enemy
 		float DistanceEnemyToUser = (float)sqrt((User->rect.x - Enemy->rect.x) * (User->rect.x - Enemy->rect.x) + (User->rect.y - Enemy->rect.y) * (User->rect.y - Enemy->rect.y));
-		if (Enemy->type == 0)
+		if (Enemy->rect.y < User->rect.y)
 		{
-			if (Enemy->rect.y < User->rect.y)
-			{
-				Enemy->speed.y = ((float)(User->rect.y - Enemy->rect.y) * MAX_SPEED_ENEMY) / DistanceEnemyToUser;
-				Enemy->speed.x = ((float)(User->rect.x - Enemy->rect.x) * MAX_SPEED_ENEMY) / DistanceEnemyToUser;
-			}
-			else
-			{
-				Enemy->speed.x = 0;
-				Enemy->speed.y = MAX_SPEED_ENEMY;
-			}
-
+			Enemy->speed.y = ((float)(User->rect.y - Enemy->rect.y) * MAX_SPEED_ENEMY) / DistanceEnemyToUser;
+			Enemy->speed.x = ((float)(User->rect.x - Enemy->rect.x) * MAX_SPEED_ENEMY) / DistanceEnemyToUser;
 		}
-		else if (Enemy->type == 1)
+		else
 		{
-			if (Enemy->rect.x < User->rect.x) //&& (User->rect.x - Enemy->rect.x) > Enemy->speed.x * frameDelay)
-			{
-				Enemy->speed.x = (float) (sqrt(pow(User->rect.x - Enemy->rect.x, 2) / 2) * MAX_SPEED_ENEMY) / DistanceEnemyToUser;
-			}
-			else if (Enemy->rect.x > User->rect.x)// && (Enemy->rect.x - User->rect.x) < Enemy->speed.x * frameDelay)
-			{
-				Enemy->speed.x = (float) (sqrt(pow(Enemy->rect.x - User->rect.x, 2) / 2) * MAX_SPEED_ENEMY) * -1 / DistanceEnemyToUser;
-			}
-			else
-			{
-				Enemy->speed.x = 0;
-				Enemy->speed.y = MAX_SPEED_ENEMY;
-			}
-
+			Enemy->speed.x = 0;
+			Enemy->speed.y = MAX_SPEED_ENEMY;
 		}
 
 		Enemy->rect.x += Update('x', Enemy->speed, frameDelay);
@@ -433,9 +364,7 @@ LMAIN:
 		// collision
 		if (UserEnemyC == true)
 		{
-			Enemy->rect.y = 0;
-			Enemy->rect.x = rand() % WINDOW_W - Enemy->rect.w;
-			Enemy->type = rand() % COUNTOFENEMYTYPE - 1;
+			isGameover = true;
 		}
 		for (int i = 0; i < BULLETMAX; i++)
 		{
@@ -443,7 +372,6 @@ LMAIN:
 			{
 				Enemy->rect.y = 0;
 				Enemy->rect.x = rand() % WINDOW_W - Enemy->rect.w;
-				Enemy->type = rand() % COUNTOFENEMYTYPE - 1;
 			}
 		}
 
@@ -454,23 +382,26 @@ LMAIN:
 		{
 			Enemy->rect.y = 0;
 			Enemy->rect.x = rand() % WINDOW_W - Enemy->rect.w;
-			Enemy->type = rand() % COUNTOFENEMYTYPE - 1;
 		}
 		if (Enemy->CollisionWithWall.x == -1) Enemy->rect.x = 0;
 		else if (Enemy->CollisionWithWall.x == 1) Enemy->rect.x = WINDOW_W - Enemy->rect.w;
 
 		// Enemy's Bullet
 		// direction setting (적이 쐈을때만 방향을 잡아주되, 유도탄처럼 플레이어를 따라가지 않고 발사된 방향 일직선으로 곧게 나감)
-		if ((MainCount * frameDelay) % 3000	== 0 && EnemyBulletIndex < BULLETMAX && (Enemy->rect.y - User->rect.y) < 1)
+		for (int i = 0; i < BULLETMAX; i++)
 		{
-			EnemyBullet[EnemyBulletIndex].Onscreen = true;
-			Mix_PlayChannel(-1, lunchBulletEffect, 0);
-			float DistanceEnemyBulletToUser = (float)sqrt((User->rect.x - EnemyBullet[EnemyBulletIndex].rect.x) * (User->rect.x - EnemyBullet[EnemyBulletIndex].rect.x) + (User->rect.y - EnemyBullet[EnemyBulletIndex].rect.y) * (User->rect.y - EnemyBullet[EnemyBulletIndex].rect.y));
-			EnemyBullet[EnemyBulletIndex].rect.x = Enemy->rect.x + (Enemy->rect.w / 2);
-			EnemyBullet[EnemyBulletIndex].rect.y = Enemy->rect.y + Enemy->rect.h;
-			EnemyBullet[EnemyBulletIndex].speed.x = ((float)(User->rect.x - EnemyBullet[EnemyBulletIndex].rect.x) * MAX_SPEED_BULLET) / DistanceEnemyBulletToUser;
-			EnemyBullet[EnemyBulletIndex].speed.y = MAX_SPEED_BULLET;//((float)(User->rect.y - EnemyBullet[EnemyBulletIndex].rect.x) * MAX_SPEED_BULLET) / DistanceEnemyBulletToUser;
-			EnemyBulletIndex++;
+			if ((MainCount * frameDelay) % 3000 == 0 && EnemyBulletIndex < BULLETMAX && (Enemy->rect.y - User->rect.y) < 1 && EnemyBullet[i].Onscreen == false)
+			{
+				EnemyBullet[EnemyBulletIndex].Onscreen = true;
+				Mix_PlayChannel(-1, lunchBulletEffect, 0);
+				float DistanceEnemyBulletToUser = (float)sqrt((User->rect.x - EnemyBullet[EnemyBulletIndex].rect.x) * (User->rect.x - EnemyBullet[EnemyBulletIndex].rect.x) + (User->rect.y - EnemyBullet[EnemyBulletIndex].rect.y) * (User->rect.y - EnemyBullet[EnemyBulletIndex].rect.y));
+				EnemyBullet[EnemyBulletIndex].rect.x = Enemy->rect.x + (Enemy->rect.w / 2);
+				EnemyBullet[EnemyBulletIndex].rect.y = Enemy->rect.y + Enemy->rect.h;
+				EnemyBullet[EnemyBulletIndex].speed.x = 0/*((float)(User->rect.x - EnemyBullet[EnemyBulletIndex].rect.x) * MAX_SPEED_BULLET) / DistanceEnemyBulletToUser*/;
+				EnemyBullet[EnemyBulletIndex].speed.y = MAX_SPEED_BULLET;//((float)(User->rect.y - EnemyBullet[EnemyBulletIndex].rect.x) * MAX_SPEED_BULLET) / DistanceEnemyBulletToUser;
+				EnemyBulletIndex++;
+				break;
+			}
 		}
 
 		for (int i = 0; i < BULLETMAX; i++)
@@ -483,15 +414,7 @@ LMAIN:
 
 			// wall collision
 			EnemyBullet[i].CollisionWithWall = wallCollision(EnemyBullet->rect, WINDOW_W, WINDOW_H);
-			if (EnemyBullet[i].CollisionWithWall.y == 1)
-			{
-				if (EnemyBulletIndex > 0)
-				{
-					EnemyBulletIndex--;
-				}
-				EnemyBullet[i].Onscreen = false;
-			}
-			if (EnemyBullet[i].CollisionWithWall.x != 0)
+			if (EnemyBullet[i].CollisionWithWall.y != 0 || EnemyBullet[i].CollisionWithWall.x != 0)
 			{
 				if (EnemyBulletIndex > 0)
 				{
@@ -504,10 +427,7 @@ LMAIN:
 			EnemyBulletUserC[i] = collision(EnemyBullet[i].rect, User->rect);
 			if (EnemyBulletUserC[i] == true && EnemyBulletIndex > 0)
 			{
-				if (EnemyBulletIndex)
-				{
-					EnemyBulletIndex--;
-				}
+				isGameover = true;
 				EnemyBullet[i].Onscreen = false;
 			}
 		}
@@ -561,6 +481,7 @@ LMAIN:
 		{
 			if (EnemyBullet[i].Onscreen == true)
 			{
+				printf("rendering bullet");
 				SDL_RenderCopy(renderer, EnemyBulletTex, NULL, &EnemyBullet[i].rect);
 			}
 		}
@@ -573,57 +494,57 @@ LMAIN:
 		sprintf(tHighScore, "HI score: %lld", highScore);
 		TTF_AutoPrinting(tHighScore, 36, renderer, 0, 0, 255, 0, 10, 56);
 
-		for (int i = 0; i < BULLETMAX; i++)
+
+		if (isGameover)
 		{
-			if (UserEnemyC || EnemyBulletUserC[i])
+			Mix_PauseMusic();
+			Mix_PlayChannel(-1, gameoverEffect, 0);
+			TTF_AutoPrinting("Game Over", 60, renderer, 255, 0, 0, 0, (WINDOW_W / 2) - ((60 / 2) * (9 / 2)), (WINDOW_H / 2) - (60 / 2));
+			SDL_RenderPresent(renderer);
+			SDL_Delay(1500);
+			//mainbg->Onscreen = true;
+
+			isGameover = false;
+
+			UserEnemyC = false;
+
+			InitUser(User, UserTex, tmpSurface, window, renderer);
+
+			InitEnemy(Enemy, UserTex, tmpSurface, window, renderer);
+
+			InitUserBullet(User, UserBullet, UserBulletTex, tmpSurface, window, renderer);
+
+			InitEnemyBullet(Enemy, EnemyBullet, EnemyBulletTex, tmpSurface, window, renderer);
+			for (int j = 0; j < BULLETMAX; j++)
 			{
-				Mix_PauseMusic();
-				Mix_PlayChannel(-1, gameoverEffect, 0);
-				TTF_AutoPrinting("Game Over", 60, renderer, 255, 0, 0, 0, (WINDOW_W / 2) - ((60 / 2) * (9 / 2)), (WINDOW_H / 2) - (60 / 2));
-				SDL_RenderPresent(renderer);
-				SDL_Delay(1500);
-				//mainbg->Onscreen = true;
-				isRunning = false;
-				UserEnemyC = false;
-
-				InitUser(User, UserTex, tmpSurface, window, renderer);
-
-				InitEnemy(Enemy, UserTex, tmpSurface, window, renderer);
-
-				InitUserBullet(User, UserBullet, UserBulletTex, tmpSurface, window, renderer);
-
-				InitEnemyBullet(Enemy, EnemyBullet, EnemyBulletTex, tmpSurface, window, renderer);
-				for (int j = 0; j < BULLETMAX; j++)
-				{
-					EnemyBullet[i].Onscreen = true;
-				}
-
-				for (int j = 0; j < BULLETMAX; j++)
-				{
-					EnemyBulletUserC[j] = { false };
-					UserBulletEnemyC[j] = { false };
-				}
-				if (score > highScore)
-				{
-					fp = fopen("./resource/highScore.txt", "wt");
-					if (fp != NULL)
-					{
-						fprintf(fp, "%lld", score);
-						fclose(fp);
-						fp = NULL;
-					}
-					highScore = score;
-				}
-				score = 0;
-
-
-				mainbg->Onscreen = true;
-				Mix_PlayMusic(backgroundSound, -1);
-				goto LMAINBG;
-				break;
+				EnemyBullet[j].Onscreen = true;
 			}
 
+			for (int j = 0; j < BULLETMAX; j++)
+			{
+				EnemyBulletUserC[j] = { false };
+				UserBulletEnemyC[j] = { false };
+			}
+			if (score > highScore)
+			{
+				fp = fopen("./resource/highScore.txt", "wt");
+				if (fp != NULL)
+				{
+					fprintf(fp, "%lld", score);
+					fclose(fp);
+					fp = NULL;
+				}
+				highScore = score;
+			}
+			score = 0;
+
+
+			mainbg->Onscreen = true;
+			Mix_PlayMusic(backgroundSound, -1);
+			goto LMAINBG;
 		}
+
+
 		SDL_RenderPresent(renderer);
 
 			
