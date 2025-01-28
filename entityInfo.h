@@ -31,7 +31,6 @@ struct Bullet
 };
 
 void InitBackground(Background* Ocean, SDL_Texture* OceanTex, SDL_Surface* tmpSurface, SDL_Window* window, SDL_Renderer* renderer);
-void InitCloud(Background* Cloud, SDL_Texture* CloudTex, SDL_Surface* tmpSurface, SDL_Window* window, SDL_Renderer* renderer);
 Plane* InitUser(Plane* User, SDL_Texture* UserTex, SDL_Surface* tmpSurface, SDL_Window* window, SDL_Renderer* renderer);
 void InitEnemy(Plane* Enemy, SDL_Texture* EnemyTex, SDL_Surface* tmpSurface, SDL_Window* window, SDL_Renderer* renderer);
 void InitUserBullet(Plane* User, Bullet* UserBullet, SDL_Texture* UserBulletTex, SDL_Surface* tmpSurface, SDL_Window* window, SDL_Renderer* renderer);

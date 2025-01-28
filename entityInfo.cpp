@@ -100,8 +100,8 @@ Plane* InitUser(Plane* User, SDL_Texture* UserTex, SDL_Surface* tmpSurface, SDL_
 		SDL_Quit();
 		exit(-1);
 	}
-	User->rect.w = 64;
-	User->rect.h = 64;
+	User->rect.w = 46;
+	User->rect.h = 43;
 	User->rect.x = WINDOW_W / 2 - (User->rect.w / 2);
 	User->rect.y = WINDOW_H - User->rect.h;
 	User->speed.x = 0;
@@ -135,8 +135,8 @@ void InitEnemy(Plane* Enemy, SDL_Texture* EnemyTex, SDL_Surface* tmpSurface, SDL
 		exit(-1);
 	}
 
-	Enemy->rect.w = 64;
-	Enemy->rect.h = 64;
+	Enemy->rect.w = 51;
+	Enemy->rect.h = 61;
 	Enemy->rect.x = WINDOW_W / 2 - (Enemy->rect.w / 2);
 	Enemy->rect.y = 0;
 	Enemy->speed.x = 0;

@@ -85,14 +85,6 @@ int main(int argc, char** argv)
 
 	InitBackground(Ocean, OceanTex, tmpSurface, window, renderer);
 
-	// Cloud
-	Background* Cloud = (Background*)malloc(sizeof(Background) * 2);
-	tmpSurface = IMG_Load("./resource/cloud.png");
-	SDL_Texture* CloudTex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
-	SDL_FreeSurface(tmpSurface);
-
-	InitCloud(Cloud, CloudTex, tmpSurface, window, renderer);
-
 	// User
 	Plane* User = (Plane*)malloc(sizeof(Plane) * 1);
 	tmpSurface = IMG_Load("./resource/User.png");
@@ -199,32 +191,31 @@ LMAIN:
 					isRunning = false;
 					break;
 				case SDLK_w:
-					User->speed.y = -0.4;
+					User->speed.y = -0.5;
 					break;
 				case SDLK_s:
-					User->speed.y = 0.4;
+					User->speed.y = 0.5;
 					break;
 				case SDLK_a:
-					User->speed.x = -0.4;
+					User->speed.x = -0.5;
 					break;
 				case SDLK_d:
-					User->speed.x = 0.4;
+					User->speed.x = 0.5;
 					break;
 				case SDLK_UP:
-					User->speed.y = -0.4;
+					User->speed.y = -0.5;
 					break;
 				case SDLK_DOWN:
-					User->speed.y = 0.4;
+					User->speed.y = 0.5;
 					break;
 				case SDLK_LEFT:
-					User->speed.x = -0.4;
+					User->speed.x = -0.5;
 					break;
 				case SDLK_RIGHT:
-					User->speed.x = 0.4;
+					User->speed.x = 0.5;
 					break;
 				case SDLK_SPACE:
-					/*BULLET INDEXING*/
-
+					
 					break;
 				default:
 					break;
@@ -262,6 +253,17 @@ LMAIN:
 					User->speed.x = 0;
 					break;
 				case SDLK_SPACE:
+					/*BULLET INDEXING*/
+					if (UserBulletIndex >= BULLETMAX)
+					{
+						break;
+					}
+					else
+					{
+						UserBullet[UserBulletIndex].speed.y = 0.8;
+						UserBullet[UserBulletIndex].Onscreen = true;
+					}
+					
 					if (UserBulletIndex < BULLETMAX)
 					{
 						Mix_PlayChannel(-1, lunchBulletEffect, 0);
@@ -270,15 +272,6 @@ LMAIN:
 					if (score > 0)
 					{
 						score--;
-					}
-					if (UserBulletIndex >= BULLETMAX)
-					{
-						break;
-					}
-					else
-					{
-						UserBullet[UserBulletIndex].speed.y = 0.7;
-						UserBullet[UserBulletIndex].Onscreen = true;
 					}
 					break;
 				default:
@@ -390,7 +383,7 @@ LMAIN:
 		// direction setting (적이 쐈을때만 방향을 잡아주되, 유도탄처럼 플레이어를 따라가지 않고 발사된 방향 일직선으로 곧게 나감)
 		for (int i = 0; i < BULLETMAX; i++)
 		{
-			if ((MainCount * frameDelay) % 3000 == 0 && EnemyBulletIndex < BULLETMAX && (Enemy->rect.y - User->rect.y) < 1 && EnemyBullet[i].Onscreen == false)
+			if ((MainCount * frameDelay) % 1500 == 0 && EnemyBulletIndex < BULLETMAX && (Enemy->rect.y - User->rect.y) < 1 && EnemyBullet[i].Onscreen == false)
 			{
 				EnemyBullet[EnemyBulletIndex].Onscreen = true;
 				Mix_PlayChannel(-1, lunchBulletEffect, 0);
@@ -434,17 +427,6 @@ LMAIN:
 
 		//printf("------------");
 
-		// Cloud
-		for (int i = 0; i < 2; i++)
-		{
-			Cloud[i].rect.y += (int)(Cloud[i].speed.y * frameDelay);
-
-			if (Cloud[i].rect.y >= WINDOW_H)
-			{
-				Cloud[i].rect.y = 0 - WINDOW_H;
-			}
-		}
-
 		// Ocean
 		for (int i = 0; i < 2; i++)
 		{
@@ -464,8 +446,6 @@ LMAIN:
 		// Ocean
 		for (int i = 0; i < 2; i++) if (Ocean[i].Onscreen == true) SDL_RenderCopy(renderer, OceanTex, NULL, &Ocean[i].rect);
 
-		// Cloud
-		for (int i = 0; i < 2; i++) if (Cloud[i].Onscreen == true) SDL_RenderCopy(renderer, CloudTex, NULL, &Cloud[i].rect);
 
 		// User
 		if (User->Onscreen == true) SDL_RenderCopy(renderer, UserTex, NULL, &User->rect);
@@ -488,11 +468,11 @@ LMAIN:
 		// Font
 		char tScore[28] = { 0 };
 		sprintf(tScore, "score: %lld", score);
-		TTF_AutoPrinting(tScore, 36, renderer, 0, 0, 255, 0, 10, 10);
+		TTF_AutoPrinting(tScore, 36, renderer, 255, 255, 255, 0, 10, 10);
 
 		char tHighScore[31] = { 0 };
 		sprintf(tHighScore, "HI score: %lld", highScore);
-		TTF_AutoPrinting(tHighScore, 36, renderer, 0, 0, 255, 0, 10, 56);
+		TTF_AutoPrinting(tHighScore, 36, renderer, 255, 255, 255, 0, 10, 56);
 
 
 		if (isGameover)
@@ -575,7 +555,6 @@ LMAIN:
 
 	/*EXIT*/
 	autoFree(Ocean);
-	autoFree(Cloud);
 	autoFree(User);
 	autoFree(UserBullet);
 	autoFree(Enemy);
