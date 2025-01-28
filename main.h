@@ -20,7 +20,7 @@
 #define WINDOW_H 640
 
 #define TMPMAX 10
-#define BULLETMAX 5
+#define BULLETMAX 20
 #define COUNTOFENEMYTYPE 2
 
 #define MAX_SPEED_ENEMY 0.4f

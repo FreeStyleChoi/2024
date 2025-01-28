@@ -508,7 +508,7 @@ LMAIN:
 			if (score > highScore)
 			{
 				fp = fopen("./resource/highScore.txt", "wt");
-				if (fp != NULL)
+				if (fp != NULL) 
 				{
 					fprintf(fp, "%lld", score);
 					fclose(fp);
